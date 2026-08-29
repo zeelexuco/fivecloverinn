@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin - Five Clover Hotels</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,sans-serif;background:#0f172a;color:#fff;padding:20px}
+.login{max-width:360px;margin:80px auto;background:#1e293b;padding:30px;border-radius:16px;text-align:center}
+input,select,textarea{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff}
+button{background:#22c55e;color:#000;border:none;padding:12px 20px;border-radius:8px;font-weight:700;cursor:pointer;width:100%;margin-top:10px}
+button.del{background:#ef4444;color:#fff}
+.card{background:#1e293b;padding:16px;border-radius:12px;margin-bottom:12px}
+.hidden{display:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+.hotel-item{background:#0f172a;padding:12px;border-radius:8px;margin:6px 0;display:flex;justify-content:space-between;align-items:center}
+</style></head>
+<body>
+
+<div id="loginBox" class="login">
+<h2>🔐 Five Clover Admin</h2>
+<p style="margin:10px 0 20px;color:#94a3b8">Enter password to manage 13 hotels</p>
+<input type="password" id="pass" placeholder="Password">
+<button onclick="login()">Login</button>
+<p id="err" style="color:#ef4444;margin-top:10px"></p>
+</div>
+
+<div id="adminBox" class="hidden">
+<h1>🏨 Five Clover — 13 Hotels Manager</h1>
+<p style="color:#94a3b8;margin-bottom:20px">Password: clover123456 | Add/Edit hotels, rooms, rates</p>
+
+<div class="grid">
+<div class="card">
+<h3>➕ Add / Edit Hotel</h3>
+<input id="hId" type="hidden">
+<input id="hName" placeholder="Hotel Name e.g. Five Clover Monastery Road">
+<input id="hAddr" placeholder="Address e.g. 10 Monastery Road, Ajah">
+<input id="hCity" placeholder="City e.g. Lagos">
+<input id="hRating" placeholder="Rating e.g. 9.0">
+<input id="hImg" placeholder="Main Image URL (or leave blank)">
+<textarea id="hDesc" placeholder="Description"></textarea>
+<button onclick="saveHotel()">Save Hotel</button>
+<button onclick="clearHotelForm()" style="background:#334155;color:#fff">Clear</button>
+</div>
+
+<div class="card">
+<h3>🛏️ Add Room to Selected Hotel</h3>
+<select id="hotelSelect"></select>
+<input id="rName" placeholder="Room Name e.g. Deluxe Suite">
+<input id="rSize" placeholder="Size e.g. 22 m²">
+<input id="rBed" placeholder="Bed e.g. 1 full bed">
+<input id="rPrice" placeholder="Current Price e.g. 44981">
+<input id="rOldPrice" placeholder="Old Price e.g. 56226">
+<input id="rImg" placeholder="Room Image URL">
+<input id="rLeft" placeholder="Rooms Left e.g. 3">
+<button onclick="addRoom()">Add Room</button>
+</div>
+</div>
+
+<div class="card" style="margin-top:20px">
+<h3>📋 Your Hotels (<span id="count">0</span>/13)</h3>
+<div id="hotelList"></div>
+<button onclick="exportData()" style="background:#3b82f6;color:#fff;margin-top:15px">📤 EXPORT CODE FOR WEBSITE - Click after editing</button>
+<pre id="exportBox" style="background:#000;padding:15px;border-radius:8px;margin-top:15px;white-space:pre-wrap;word-break:break-all;font-size:11px;max-height:300px;overflow:auto;display:none"></pre>
+</div>
+
+<button onclick="location.reload()" style="background:#334155;color:#fff;margin-top:20px">Logout</button>
+</div>
+
+<script>
+const PASS="clover123456";
+let hotels = JSON.parse(localStorage.getItem('cloverHotels')||'null') || [
+{name:"Five Clover Monastery Road",address:"10 Monastery Road, Ajah, Sangotedo",city:"Lagos",rating:"9.0",desc:"Comfortable Accommodations with family rooms, air-conditioning, private bathrooms.",img:"https://images.unsplash.com/photo-1566073771259-6a8506099945",rooms:[
+{name:"Deluxe Suite",size:"22 m²",bed:"1 full bed",price:44981,oldPrice:56226,img:"https://images.unsplash.com/photo-1631049307264-da0ec9d70304",left:3},
+{name:"Executive Suite",size:"25 m²",bed:"1 queen bed",price:49265,oldPrice:61581,img:"https://images.unsplash.com/photo-1611892440504-42a792e24d32",left:5}
+]},
+{name:"Five Clover Lekki Phase 1",address:"Lekki Phase 1",city:"Lagos",rating:"8.8",desc:"Premium stay in Lekki",img:"",rooms:[]},
+{name:"Five Clover VI",address:"Victoria Island",city:"Lagos",rating:"8.9",desc:"Business hotel in VI",img:"",rooms:[]}
+];
+
+function login(){if(document.getElementById('pass').value===PASS){document.getElementById('loginBox').classList.add('hidden');document.getElementById('adminBox').classList.remove('hidden');render()}else{document.getElementById('err').innerText="Wrong password!"}}
+function saveHotel(){
+let name=document.getElementById('hName').value,addr=document.getElementById('hAddr').value,city=document.getElementById('hCity').value,rating=document.getElementById('hRating').value,desc=document.getElementById('hDesc').value,img=document.getElementById('hImg').value;
+if(!name)return alert("Enter hotel name");
+let id=document.getElementById('hId').value;
+if(id!==""){hotels[id]={...hotels[id],name,address:addr,city,rating,desc,img}}else{hotels.push({name,address:addr,city,rating,desc,img,rooms:[]})}
+localStorage.setItem('cloverHotels',JSON.stringify(hotels));clearHotelForm();render();
+}
+function clearHotelForm(){document.getElementById('hId').value="";document.getElementById('hName').value="";document.getElementById('hAddr').value="";document.getElementById('hCity').value="";document.getElementById('hRating').value="";document.getElementById('hDesc').value="";document.getElementById('hImg').value="";}
+function render(){
+let list=document.getElementById('hotelList');let sel=document.getElementById('hotelSelect');
+list.innerHTML="";sel.innerHTML="";
+hotels.forEach((h,i)=>{
+let div=document.createElement('div');div.className='hotel-item';
+div.innerHTML=`<div><strong>${i+1}. ${h.name}</strong><br><small>${h.address} - ${h.rooms.length} rooms</small></div><div><button onclick="editHotel(${i})" style="width:auto;padding:6px 10px;background:#3b82f6;color:#fff">Edit</button> <button onclick="deleteHotel(${i})" style="width:auto;padding:6px 10px" class="del">X</button></div>`;
+list.appendChild(div);
+let opt=document.createElement('option');opt.value=i;opt.textContent=h.name;sel.appendChild(opt);
+});
+document.getElementById('count').innerText=hotels.length;
+localStorage.setItem('cloverHotels',JSON.stringify(hotels));
+}
+function editHotel(i){let h=hotels[i];document.getElementById('hId').value=i;document.getElementById('hName').value=h.name;document.getElementById('hAddr').value=h.address;document.getElementById('hCity').value=h.city;document.getElementById('hRating').value=h.rating;document.getElementById('hDesc').value=h.desc;document.getElementById('hImg').value=h.img;window.scrollTo(0,0);}
+function deleteHotel(i){if(confirm("Delete "+hotels[i].name+"?")){hotels.splice(i,1);render()}}
+function addRoom(){
+let idx=document.getElementById('hotelSelect').value;if(idx==="")return alert("Select hotel");
+let r={name:document.getElementById('rName').value,size:document.getElementById('rSize').value,bed:document.getElementById('rBed').value,price:parseInt(document.getElementById('rPrice').value)||0,oldPrice:parseInt(document.getElementById('rOldPrice').value)||0,img:document.getElementById('rImg').value,left:parseInt(document.getElementById('rLeft').value)||1};
+if(!r.name)return alert("Enter room name");
+hotels[idx].rooms.push(r);localStorage.setItem('cloverHotels',JSON.stringify(hotels));render();alert("Room added to "+hotels[idx].name);
+document.getElementById('rName').value="";document.getElementById('rPrice').value="";document.getElementById('rOldPrice').value="";
+}
+function exportData(){
+let code = "const HOTELS_DATA = " + JSON.stringify(hotels,null,2) + ";";
+document.getElementById('exportBox').style.display="block";
+document.getElementById('exportBox').innerText=code+"\n\n// COPY THIS CODE AND PASTE IT INSIDE YOUR index.html - REPLACE THE OLD HOTELS_DATA";
+alert("Code generated below! Copy it and I will update your main website.");
+}
+</script>
+</body></html>
