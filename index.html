@@ -1,63 +1,76 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lagos Hotel Collection - 13 Locations | Direct WhatsApp Booking</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Five Clover Hotels | Official Booking - Lagos</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',sans-serif;background:#fdfbf7}
-.header{padding:18px 24px;display:flex;justify-content:space-between;align-items:center;background:#fff;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-.hero{background:linear-gradient(135deg,#f0e8d9 0%,#e8ddd0 100%);padding:60px 20px;text-align:center}
-.hero h1{font-family:'Playfair Display',serif;font-size:40px;line-height:1.1;max-width:700px;margin:0 auto}
-.filter{margin-top:25px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.filter button{padding:10px 18px;border-radius:30px;border:1px solid #c5a880;background:#fff;cursor:pointer;font-weight:600}
-.filter button.active{background:#111;color:#fff;border-color:#111}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;padding:35px 20px;max-width:1250px;margin:auto}
-.card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.06)}
-.card img{width:100%;height:210px;object-fit:cover}.card-body{padding:20px}
-.tag{background:#111;color:#fff;padding:5px 10px;border-radius:8px;font-size:10px;font-weight:700;letter-spacing:1px}
-.loc{color:#888;font-size:13px;margin-top:5px}.meta{display:flex;gap:10px;margin:10px 0;font-size:12px;color:#6b5a45}
-.btn{display:block;text-align:center;background:#25D366;color:#fff;padding:13px;border-radius:12px;text-decoration:none;margin-top:14px;font-weight:700}
-.footer{background:#111;color:#999;text-align:center;padding:30px 20px;margin-top:40px;font-size:13px;line-height:1.6}
-</style></head><body>
-<div class="header"><b>LAGOS HOTEL COLLECTION</b><span style="font-size:12px;background:#f0e8d9;padding:6px 12px;border-radius:20px">13 LOCATIONS • DIRECT BOOKING</span></div>
-<div class="hero">
-<h1>13 Hotels. One Standard. All Over Lagos.</h1>
-<p>From Abijo to Ikeja — Book direct on WhatsApp for best rate. Each branch has its own manager.</p>
-<div class="filter">
-<button class="active" onclick="filterH(event,'all')">All 13</button>
-<button onclick="filterH(event,'Ajah')">Ajah / Sangotedo (4)</button>
-<button onclick="filterH(event,'Lekki')">Lekki (2)</button>
-<button onclick="filterH(event,'Yaba')">Yaba / Igbobi (2)</button>
-<button onclick="filterH(event,'Ikeja')">Ikeja / GRA (3)</button>
-<button onclick="filterH(event,'Ilupeju')">Ilupeju / Ladipo (2)</button>
-</div>
-</div>
-<div class="grid">
-<div class="card" data-loc="Ajah"><img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600"><div class="card-body"><span class="tag">FIVE CLOVER</span><h3>Five Clover Hotel Abijo</h3><p class="loc">📍 Abijo GRA, Ajah</p><div class="meta"><span>⭐ 4.8</span><span>• WiFi • Power</span></div><a class="btn" target="_blank" href="https://wa.me/2349159477805?text=Hello%2C%20I%20want%20to%20book%20at%20Five%20Clover%20Abijo">💬 Book on WhatsApp</a></div></div>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,sans-serif;background:#f8f7f4;color:#1a1a1a}
+.nav{background:#0f2818;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.hero{background:linear-gradient(rgba(15,40,24,0.85),rgba(15,40,24,0.7)),url('https://images.unsplash.com/photo-1566073771259-6a8506099945');background-size:cover;color:#fff;padding:70px 20px;text-align:center}
+.hero h1{font-family:Playfair Display,serif;font-size:42px}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;margin-top:20px}
+.hotel{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.07);cursor:pointer;transition:.2s}
+.hotel:hover{transform:translateY(-4px)}
+.h-img{height:200px;background-size:cover;background-position:center;position:relative}
+.badge{position:absolute;top:12px;left:12px;background:#fff;color:#0f2818;padding:5px 12px;border-radius:20px;font-weight:700;font-size:12px}
+.h-body{padding:18px}
+.price{font-size:22px;font-weight:800;color:#0f2818}
+.old{text-decoration:line-through;color:#888;font-size:13px}
+.btn{background:#0f2818;color:#fff;border:none;padding:12px;border-radius:10px;width:100%;font-weight:700;margin-top:10px;cursor:pointer}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:99;padding:20px}
+.modal-box{background:#fff;border-radius:18px;max-width:800px;width:100%;max-height:90vh;overflow:auto}
+.room{border:1px solid #eee;border-radius:14px;overflow:hidden;display:flex;gap:0;margin-bottom:12px}
+.r-img{width:140px;background-size:cover;background-position:center}
+.r-body{padding:14px;flex:1}
+@media(max-width:600px){.hero h1{font-size:32px}.room{flex-direction:column}.r-img{width:100%;height:160px}}
+</style>
+</head>
+<body>
+<div class="nav"><strong>☘️ FIVE CLOVER HOTELS</strong><a href="admin.html" style="color:#fff;font-size:12px;opacity:.7;text-decoration:none">Admin</a></div>
+<div class="hero"><h1>Stay in Comfort,<br>Pay at Property</h1><p style="margin-top:10px;opacity:.9">13 Hotels • Free Cancellation • Breakfast Included • Lagos</p>
+<p style="margin-top:15px"><span style="background:#fff;color:#0f2818;padding:8px 16px;border-radius:20px;font-weight:700;font-size:13px">⭐ 9.0 Wonderful Rated • Excellent Location</span></p></div>
+<div class="container"><h2 style="font-family:Playfair Display,serif;font-size:28px">Our Hotels (<span id="count">0</span>)</h2>
+<div class="grid" id="hotelGrid"></div>
+<div style="text-align:center;padding:40px 20px;color:#888;font-size:12px">© 2026 Five Clover Hotels — Official Direct Booking<br>📍 10 Monastery Road, Ajah + 12 other locations in Lagos</div></div>
 
-<div class="card" data-loc="Ajah"><img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600"><div class="card-body"><span class="tag">FIVE CLOVER</span><h3>Five Clover Inn Monastery</h3><p class="loc">📍 Monastery Road, Sangotedo</p><div class="meta"><span>⭐ 4.7</span><span>• Pool • Bar</span></div><a class="btn" target="_blank" href="https://wa.me/2349075105702?text=Hello%2C%20I%20want%20to%20book%20at%20Five%20Clover%20Monastery">💬 Book on WhatsApp</a></div></div>
+<div class="modal" id="modal"><div class="modal-box" id="modalBox"></div></div>
 
-<div class="card" data-loc="Ajah"><img src="https://images.unsplash.com/photo-1551882547-b79c11488d6c?w=600"><div class="card-body"><span class="tag">RINGRUBY</span><h3>RingRuby Hotel United Estate</h3><p class="loc">📍 United Estate, Sangotedo</p><div class="meta"><span>⭐ 4.9</span><span>• Executive</span></div><a class="btn" target="_blank" href="https://wa.me/2349077168507?text=Hello%2C%20I%20want%20to%20book%20at%20RingRuby%20United%20Estate">💬 Book on WhatsApp</a></div></div>
+<script>
+// THIS DATA COMES FROM YOUR ADMIN - It will auto-update when you export from admin
+const HOTELS_DATA = [
+{"name":"Five Clover Monastery Road","address":"10 Monastery Road, Ajah, Sangotedo","city":"Lagos","rating":"9.0","desc":"Comfortable Accommodations with family rooms, air-conditioning, private bathrooms, restaurant & free parking.","img":"https://images.unsplash.com/photo-1566073771259-6a8506099945","rooms":[{"name":"Deluxe Suite","size":"22 m²","bed":"1 full bed","price":44981,"oldPrice":56226,"img":"https://images.unsplash.com/photo-1631049307264-da0ec9d70304","left":3},{"name":"Executive Suite","size":"25 m²","bed":"1 queen bed","price":49265,"oldPrice":61581,"img":"https://images.unsplash.com/photo-1611892440504-42a792e24d32","left":5}]},
+{"name":"Five Clover Lekki Phase 1","address":"Lekki Phase 1","city":"Lagos","rating":"8.8","desc":"Premium stay in Lekki with modern amenities.","img":"https://images.unsplash.com/photo-1551882547-b79c114e9d6e","rooms":[]},
+{"name":"Five Clover Victoria Island","address":"Victoria Island","city":"Lagos","rating":"8.9","desc":"Business hotel in VI - Perfect for work and leisure.","img":"https://images.unsplash.com/photo-1520250497591-112f2f40a3f4","rooms":[]}
+];
 
-<div class="card" data-loc="Ajah"><img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600"><div class="card-body"><span class="tag">RINGRUBY</span><h3>RingRuby Hotel Value County</h3><p class="loc">📍 Value County, Ajah</p><div class="meta"><span>⭐ 4.6</span><span>• Affordable Luxury</span></div><a class="btn" target="_blank" href="https://wa.me/2349159477805?text=Hello%2C%20I%20want%20to%20book%20at%20RingRuby%20Value%20County">💬 Book on WhatsApp</a></div></div>
+// Load from admin localStorage if available
+let hotels = JSON.parse(localStorage.getItem('cloverHotels')||'null') || HOTELS_DATA;
 
-<div class="card" data-loc="Lekki"><img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600"><div class="card-body"><span class="tag">CARITAS INN</span><h3>Caritas Inn Ilasan</h3><p class="loc">📍 Ilasan, Lekki</p><div class="meta"><span>⭐ 4.8</span><span>• Cozy • Central</span></div><a class="btn" target="_blank" href="https://wa.me/2347042798946?text=Hello%2C%20I%20want%20to%20book%20at%20Caritas%20Ilasan">💬 Book on WhatsApp</a></div></div>
-
-<div class="card" data-loc="Lekki"><img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600"><div class="card-body"><span class="tag">CARITAS INN</span><h3>Caritas Inn Lekki</h3><p class="loc">📍 Lekki Phase 1</p><div class="meta"><span>⭐ 4.9</span><span>• Prime Location</span></div><a class="btn" target="_blank" href="https://wa.me/2349125660131?text=Hello%2C%20I%20want%20to%20book%20at%20Caritas%20Lekki">💬 Book on WhatsApp</a></div></div>
-
-<div class="card" data-loc="Yaba"><img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600"><div class="card-body"><span class="tag">CARITAS INN</span><h3>Caritas Inn Yaba</h3><p class="loc">📍 Yaba, Mainland</p><div class="meta"><span>⭐ 4.7</span><span>• Business Friendly</span></div><a class="btn" target="_blank" href="https://wa.me/2349122649648?text=Hello%2C%20I%20want%20to%20book%20at%20Caritas%20Yaba">💬 Book on WhatsApp</a></div></div>
-
-<div class="card" data-loc="Yaba"><img src="https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=600"><div class="card-body"><span class="tag">CARITAS INN</span><h3>Caritas Inn Igbobi</h3><p class="loc">📍 Igbobi, Yaba</p><div class="meta"><span>⭐ 4.6</span><span>• Quiet • Clean</span></div><a class="btn" target="_blank" href="https://wa.me/2348126955544?text=Hello%2C%20I%20want%20to%20book%20at%20Caritas%20Igbobi">💬 Book on WhatsApp</a></div></div>
-
-<div class="card" data-loc="Ilupeju"><img src="https://images.unsplash.com/photo-1571003123894-1f0594d2b597?w=600"><div class="card-body"><span class="tag">FIVE CLOVER</span><h3>Five Clover Ilupeju</h3><p class="loc">📍 Ilupeju, Lagos</p><div class="meta"><span>⭐ 4.8</span><span>• Business</span></div><a class="btn" target="_blank" href="https://wa.me/2349159477805?text=Hello%2C%20I%20want%20to%20book%20at%20Five%20Clover%20Ilupeju">💬 Book on WhatsApp</a></div></div>
-
-<div class="card" data-loc="Ikeja"><img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=600"><div class="card-body"><span class="tag">RINGRUBY</span><h3>RingRuby Hotel Oduduwa GRA Ikeja</h3><p class="loc">📍 Oduduwa GRA, Ikeja</p><div class="meta"><span>⭐ 4.9</span><span>• Luxury</span></div><a class="btn" target="_blank" href="https://wa.me/2347017393412?text=Hello%2C%20I%20want%20to%20book%20at%20RingRuby%20Oduduwa%20GRA">💬 Book on WhatsApp</a></div></div>
-
-<div class="card" data-loc="Ikeja"><img src="https://images.unsplash.com/photo-1551882547-b79c11488d6c?w=600"><div class="card-body"><span class="tag">RINGRUBY</span><h3>RingRuby Hotel ESO Ikeja</h3><p class="loc">📍 ESO, Ikeja</p><div class="meta"><span>⭐ 4.7</span><span>• Classic Comfort</span></div><a class="btn" target="_blank" href="https://wa.me/2347012931037?text=Hello%2C%20I%20want%20to%20book%20at%20RingRuby%20ESO%20Ikeja">💬 Book on WhatsApp</a></div></div>
-
-<div class="card" data-loc="Ilupeju"><img src="https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=600"><div class="card-body"><span class="tag">RINGRUBY</span><h3>RingRuby Hotel Bateye Ladipo</h3><p class="loc">📍 Bateye, Ladipo</p><div class="meta"><span>⭐ 4.6</span><span>• Affordable</span></div><a class="btn" target="_blank" href="https://wa.me/2347017393412?text=Hello%2C%20I%20want%20to%20book%20at%20RingRuby%20Bateye">💬 Book on WhatsApp</a></div></div>
-
-<div class="card" data-loc="Ikeja"><img src="https://images.unsplash.com/photo-1519974719765-e6559eac2575?w=600"><div class="card-body"><span class="tag">THE CORDIS</span><h3>The Cordis Hotel Ikeja</h3><p class="loc">📍 Ikeja, Lagos</p><div class="meta"><span>⭐ 5.0</span><span>• Premium</span></div><a class="btn" target="_blank" href="https://wa.me/2347012931037?text=Hello%2C%20I%20want%20to%20book%20at%20The%20Cordis%20Ikeja">💬 Book on WhatsApp</a></div></div>
-</div>
-<div class="footer">© 2026 Lagos Hotel Collection — Five Clover • RingRuby • Caritas Inn • The Cordis<br>13 Locations Across Lagos • Direct WhatsApp Booking • No Commission<br>Contact Developer: adewuyioluwagbenga590@gmail.com</div>
-<script>function filterH(e,loc){document.querySelectorAll('.filter button').forEach(b=>b.classList.remove('active'));e.target.classList.add('active');document.querySelectorAll('.card').forEach(c=>{c.style.display=(loc=='all'||c.dataset.loc==loc)?'block':'none';});}</script>
-</body></html>
+function render(){
+let grid=document.getElementById('hotelGrid');grid.innerHTML="";
+document.getElementById('count').innerText=hotels.length;
+hotels.forEach((h,i)=>{
+let img=h.img||'https://images.unsplash.com/photo-1566073771259-6a8506099945';
+let div=document.createElement('div');div.className='hotel';div.onclick=()=>openHotel(i);
+div.innerHTML=`<div class="h-img" style="background-image:url('${img}')"><div class="badge">⭐ ${h.rating||'9.0'} • ${h.city}</div></div><div class="h-body"><h3>${h.name}</h3><p style="font-size:13px;color:#666;margin:6px 0">${h.address}</p><p style="font-size:13px;color:#444">${h.desc.slice(0,80)}...</p><div style="margin-top:10px"><small>${h.rooms.length} room types</small> ${h.rooms[0]?`<br><span class="old">NGN ${h.rooms[0].oldPrice?.toLocaleString()}</span> <span class="price">NGN ${h.rooms[0].price.toLocaleString()}</span>`:''}</div><button class="btn">View Rooms</button></div>`;
+grid.appendChild(div);
+});
+}
+function openHotel(i){
+let h=hotels[i];let m=document.getElementById('modalBox');
+let roomsHtml = h.rooms.length? h.rooms.map(r=>`
+<div class="room"><div class="r-img" style="background-image:url('${r.img||'https://images.unsplash.com/photo-1631049307264-da0ec9d70304'}')"></div>
+<div class="r-body"><h4>${r.name}</h4><small style="color:#666">${r.size||''} • ${r.bed||''}</small><br><small style="color:#0f2818;font-weight:600">✓ Breakfast • ✓ Free cancellation • Pay at property</small>
+<div style="margin-top:8px"><span class="old">NGN ${r.oldPrice?.toLocaleString()}</span> <span class="price">NGN ${r.price.toLocaleString()}</span> <small>/night • ${r.left} left</small></div>
+<button class="btn" onclick="book('${h.name}','${r.name}',${r.price})">Reserve - Pay at Property</button></div></div>`).join('') : '<p style="padding:20px">Rooms coming soon. Chat on WhatsApp to book.</p>';
+m.innerHTML=`<div style="height:220px;background:url('${h.img||'https://images.unsplash.com/photo-1566073771259-6a8506099945'}');background-size:cover;position:relative"><div style="position:absolute;inset:0;background:linear-gradient(transparent,rgba(0,0,0,.7))"></div><div style="position:absolute;bottom:15px;left:20px;color:#fff"><h2 style="font-family:Playfair Display,serif">${h.name}</h2><small>${h.address} • ⭐ ${h.rating}</small></div><button onclick="closeModal()" style="position:absolute;top:15px;right:15px;background:#fff;border:none;width:36px;height:36px;border-radius:50%;font-weight:700;cursor:pointer">X</button></div><div style="padding:20px"><p style="font-size:14px;color:#444;margin-bottom:16px">${h.desc}</p><h3 style="margin-bottom:10px">Available Rooms</h3>${roomsHtml}</div>`;
+document.getElementById('modal').style.display='flex';
+}
+function closeModal(){document.getElementById('modal').style.display='none'}
+function book(hotel,room,price){window.open(`https://wa.me/2340000000000?text=Hello, I want to book ${room} at ${hotel} for NGN ${price}. My dates are...`)}
+render();
+</script>
+</body>
+</html>
