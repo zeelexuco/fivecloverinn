@@ -2,38 +2,48 @@
 <html>
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FiveClover - Find Hotels in Lagos</title>
-<style>body{font-family:sans-serif;margin:0;background:#fff}.hero{padding:40px;text-align:center;background:#ff5a5f;color:white}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;padding:20px}.card{border-radius:12px;overflow:hidden;box-shadow:0 2px 10px #ddd}.card img{width:100%;height:200px;object-fit:cover}.card-body{padding:12px}.price{font-weight:bold;color:#ff5a5f}</style>
+<title>FiveClover - Hotels in Lagos</title>
+<style>body{font-family:sans-serif;margin:0;background:#fff}.hero{padding:40px;text-align:center;background:#ff5a5f;color:white}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;padding:20px}.card{border-radius:12px;overflow:hidden;box-shadow:0 2px 10px #ddd;cursor:pointer}.card img{width:100%;height:200px;object-fit:cover}.card-body{padding:12px}.price{font-weight:bold;color:#ff5a5f}#modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:none;overflow-y:auto;z-index:99}.modalBox{background:white;max-width:600px;margin:30px auto;border-radius:12px;overflow:hidden}.modalBox img{width:100%;height:300px;object-fit:cover}.pad{padding:20px}.room{border:1px solid #eee;border-radius:8px;padding:12px;margin:10px 0;display:flex;justify-content:space-between;align-items:center}.room b{color:#ff5a5f}</style>
 </head>
 <body>
-<div class="hero"><h1>FiveClover</h1><p>Hotels in Lagos - Live Updates</p><p id="count">Loading hotels...</p></div>
+<div class="hero"><h1>FiveClover</h1><p>Hotels in Lagos - Tap Hotel to See Rooms</p><p id="count">Loading...</p></div>
 <div class="grid" id="hotels"></div>
+
+<div id="modal" onclick="if(event.target==this)closeModal()"><div class="modalBox"><img id="mImg"><div class="pad"><h2 id="mName"></h2><p id="mLoc"></p><p id="mDesc"></p><h3>Room Categories & Availability</h3><div id="mRooms"></div><button onclick="closeModal()" style="background:black;color:white;padding:12px;border:none;border-radius:8px;width:100%;margin-top:10px">Close</button></div></div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
-const firebaseConfig = {
-  apiKey: "AIzaSyDzVRHwXgZXZmlX7KIehTLb1n-ZjGJwWfI",
-  authDomain: "fiveclover-237bb.firebaseapp.com",
-  databaseURL: "https://fiveclover-237bb-default-rtdb.firebaseio.com",
-  projectId: "fiveclover-237bb",
-  storageBucket: "fiveclover-237bb.firebasestorage.app",
-  messagingSenderId: "337287455721",
-  appId: "1:337287455721:web:ebbb8fd23959b1b0922178"
-};
-const app=initializeApp(firebaseConfig);
-const db=getDatabase(app);
+const firebaseConfig = { apiKey: "AIzaSyDzVRHwXgZXZmlX7KIehTLb1n-ZjGJwWfI", authDomain: "fiveclover-237bb.firebaseapp.com", databaseURL: "https://fiveclover-237bb-default-rtdb.firebaseio.com", projectId: "fiveclover-237bb", storageBucket: "fiveclover-237bb.firebasestorage.app", messagingSenderId: "337287455721", appId: "1:337287455721:web:ebbb8fd23959b1b0922178" };
+const app=initializeApp(firebaseConfig); const db=getDatabase(app);
+let allHotels=[];
 onValue(ref(db,'hotels'),snap=>{
-  const data=snap.val(); const grid=document.getElementById('hotels');
-  const count=document.getElementById('count');
-  if(!data){grid.innerHTML='<p style="text-align:center">No hotels yet. Check back soon!</p>';count.innerText='0 Hotels';return;}
-  const hotels=Object.values(data);
-  count.innerText=`${hotels.length} Hotels Available - Live!`;
+  const data=snap.val(); const grid=document.getElementById('hotels'); const count=document.getElementById('count');
+  if(!data){grid.innerHTML='<p style="text-align:center">No hotels yet</p>';count.innerText='0 Hotels';return;}
+  allHotels=Object.entries(data).map(([id,h])=>({...h,id}));
+  count.innerText=`${allHotels.length} Hotels in Lagos - Live!`;
   grid.innerHTML='';
-  hotels.reverse().forEach(h=>{
-    grid.innerHTML+=`<div class="card"><img src="${h.image}"><div class="card-body"><h3>${h.name}</h3><p>${h.location}</p><p>${h.desc||''}</p><p class="price">₦${h.price} / night</p><a href="https://wa.me/234XXXXXXXXX?text=Hi, I want to book ${h.name}" style="background:#25D366;color:white;padding:8px 12px;border-radius:6px;text-decoration:none;display:inline-block">Book on WhatsApp</a></div></div>`;
+  allHotels.reverse().forEach(h=>{
+    grid.innerHTML+=`<div class="card" onclick="openHotel('${h.id}')"><img src="${h.image}"><div class="card-body"><h3>${h.name}</h3><p>${h.location}</p><p>${(h.rooms||[]).length} room categories</p><p class="price">From ₦${Math.min(...(h.rooms||[{price:0}]).map(r=>r.price))} / night</p><span style="background:#ff5a5f;color:white;padding:6px 10px;border-radius:6px;font-size:13px">View Rooms</span></div></div>`;
   });
 });
+window.openHotel=(id)=>{
+  const h=allHotels.find(x=>x.id==id);
+  document.getElementById('mImg').src=h.image;
+  document.getElementById('mName').innerText=h.name;
+  document.getElementById('mLoc').innerText=h.location;
+  document.getElementById('mDesc').innerText=h.desc||'';
+  let cleanPhone=h.phone.replace(/[^0-9]/g,'').replace(/^0/,'234');
+  if(!cleanPhone.startsWith('234')) cleanPhone='234'+cleanPhone.slice(-10);
+  let html='';
+  (h.rooms||[]).forEach(r=>{
+    let msg=encodeURIComponent(`Hi ${h.name}, I want to book ${r.type} room - ₦${r.price}/night. Is ${r.available} rooms available still?`);
+    html+=`<div class="room"><div><b>${r.type}</b><br>₦${r.price} / night<br><small>${r.desc||''} - ${r.available} available</small></div><a href="https://wa.me/${cleanPhone}?text=${msg}" target="_blank" style="background:#25D366;color:white;padding:8px 14px;border-radius:6px;text-decoration:none">Book</a></div>`;
+  });
+  document.getElementById('mRooms').innerHTML=html;
+  document.getElementById('modal').style.display='block';
+};
+window.closeModal=()=>{document.getElementById('modal').style.display='none';};
 </script>
 </body>
 </html>
