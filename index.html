@@ -1,37 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FiveClover - Hotels</title>
-<style>body{font-family:sans-serif;margin:0;background:#fff}.hero{padding:30px;text-align:center;background:#ff5a5f;color:white}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;padding:20px}.card{border-radius:12px;overflow:hidden;box-shadow:0 2px 10px #ddd;cursor:pointer}.card img{width:100%;height:200px;object-fit:cover}.card-body{padding:12px}#modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;overflow-y:auto;z-index:99}.modalBox{background:white;max-width:650px;margin:20px auto;border-radius:12px;overflow:hidden}.modalBox img.main{width:100%;height:300px;object-fit:cover}.pad{padding:20px}.room{border:1px solid #eee;border-radius:10px;overflow:hidden;margin:12px 0}.room img{width:100%;height:180px;object-fit:cover}.room-info{padding:12px;display:flex;justify-content:space-between;align-items:center}</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FiveClover Inn - Hotels in Abuja</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif}
+body{background:#f6f7fb;color:#111}
+.header{background:#0f172a;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.header a{color:#fff;text-decoration:none;background:#22c55e;padding:8px 14px;border-radius:8px;font-size:13px}
+.hero{padding:28px 20px;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff}
+.container{padding:16px;max-width:1100px;margin:0 auto}
+.hotel-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06);margin-bottom:20px}
+.hotel-head{padding:16px;display:flex;justify-content:space-between;border-bottom:1px solid #eee}
+.room-grid{display:grid;grid-template-columns:1fr;gap:14px;padding:16px}
+@media(min-width:700px){.room-grid{grid-template-columns:1fr 1fr}}
+.room{background:#f8fafc;border-radius:12px;padding:12px;border:1px solid #e2e8f0}
+.avail{font-size:12px;padding:4px 8px;border-radius:20px;font-weight:600}
+.green{background:#dcfce7;color:#166534}.yellow{background:#fef9c3;color:#854d0e}.red{background:#fee2e2;color:#991b1b}
+.booking{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.booking input{padding:10px;border-radius:8px;border:1px solid #cbd5e1;width:100%}
+.book-btn{grid-column:1/-1;background:#0f172a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:600;cursor:pointer}
+</style>
 </head>
 <body>
-<div class="hero"><h1>FiveClover</h1><p>Tap hotel to see room pictures</p><p id="count">Loading...</p></div>
-<div class="grid" id="hotels"></div>
-<div id="modal" onclick="if(event.target==this)closeModal()"><div class="modalBox"><img id="mImg" class="main"><div class="pad"><h2 id="mName"></h2><p id="mLoc"></p><p id="mDesc"></p><h3>Available Rooms</h3><div id="mRooms"></div><button onclick="closeModal()" style="background:black;color:white;padding:12px;border:none;border-radius:8px;width:100%">Close</button></div></div></div>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
-const firebaseConfig = { apiKey: "AIzaSyDzVRHwXgZXZmlX7KIehTLb1n-ZjGJwWfI", authDomain: "fiveclover-237bb.firebaseapp.com", databaseURL: "https://fiveclover-237bb-default-rtdb.firebaseio.com", projectId: "fiveclover-237bb", storageBucket: "fiveclover-237bb.firebasestorage.app", messagingSenderId: "337287455721", appId: "1:337287455721:web:ebbb8fd23959b1b0922178" };
-const app=initializeApp(firebaseConfig); const db=getDatabase(app); let allHotels=[];
-onValue(ref(db,'hotels'),snap=>{
-  const data=snap.val(); const grid=document.getElementById('hotels'); const count=document.getElementById('count');
-  if(!data){grid.innerHTML='No hotels';count.innerText='0 Hotels';return;}
-  allHotels=Object.entries(data).map(([id,h])=>({...h,id}));
-  count.innerText=`${allHotels.length} Hotels Live`; grid.innerHTML='';
-  allHotels.reverse().forEach(h=>{ grid.innerHTML+=`<div class="card" onclick="openHotel('${h.id}')"><img src="${h.image}"><div class="card-body"><h3>${h.name}</h3><p>${h.location}</p><p>${(h.rooms||[]).length} categories with pics</p></div></div>`; });
-});
-window.openHotel=(id)=>{
-  const h=allHotels.find(x=>x.id==id);
-  document.getElementById('mImg').src=h.image; document.getElementById('mName').innerText=h.name; document.getElementById('mLoc').innerText=h.location; document.getElementById('mDesc').innerText=h.desc||'';
-  let cleanPhone=h.phone.replace(/[^0-9]/g,'').replace(/^0/,'234'); if(!cleanPhone.startsWith('234')) cleanPhone='234'+cleanPhone.slice(-10);
-  let html=''; (h.rooms||[]).forEach(r=>{
-    let msg=encodeURIComponent(`Hello ${h.name}, I want to book ${r.type} - ₦${r.price}. Is it available?`);
-    html+=`<div class="room"><img src="${r.image||h.image}"><div class="room-info"><div><b>${r.type}</b><br>₦${r.price}/night - ${r.available} left<br><small>${r.desc||''}</small></div><a href="https://wa.me/${cleanPhone}?text=${msg}" target="_blank" style="background:#25D366;color:white;padding:10px 16px;border-radius:6px;text-decoration:none;font-weight:bold">Book</a></div></div>`;
-  });
-  document.getElementById('mRooms').innerHTML=html; document.getElementById('modal').style.display='block';
-};
-window.closeModal=()=>document.getElementById('modal').style.display='none';
+<div class="header"><b>☘️ FiveClover</b><a href="admin.html">Admin</a></div>
+<div class="hero"><h1>Hotels in Abuja</h1><p>Check-in 12PM • Check-out 12PM • Live Rooms</p></div>
+<div class="container" id="hotelsContainer"></div>
+<script>
+const defaultHotels=[{id:'h1',name:'Demo - Add Your Hotel in Admin',location:'Gwarinpa, Abuja',rooms:[{id:'r1',type:'Standard Room',price:15000,total:5}]}];
+function getHotels(){let d=localStorage.getItem('fiveclover_hotels');if(!d){localStorage.setItem('fiveclover_hotels',JSON.stringify(defaultHotels));return defaultHotels}return JSON.parse(d)}
+function getBookings(){return JSON.parse(localStorage.getItem('fiveclover_bookings')||'[]')}
+function saveBookings(b){localStorage.setItem('fiveclover_bookings',JSON.stringify(b))}
+function cleanExpired(){let b=getBookings();let now=new Date();let f=b.filter(x=>{if(x.status==='confirmed'){if(now>=new Date(x.checkoutDateTime))return false}return true});if(f.length!==b.length)saveBookings(f)}cleanExpired();setInterval(cleanExpired,60000);
+function getAvailable(hId,rId){let h=getHotels().find(x=>x.id===hId);let r=h.rooms.find(x=>x.id===rId);let count=getBookings().filter(x=>x.hotelId===hId&&x.roomId===rId&&x.status==='confirmed').length;return r.total-count}
+function render(){let hotels=getHotels();let c=document.getElementById('hotelsContainer');c.innerHTML='';if(hotels.length===0){c.innerHTML='<p>No hotels yet. Go to Admin to add.</p>';return}hotels.forEach(hotel=>{let card=document.createElement('div');card.className='hotel-card';card.innerHTML=`<div class="hotel-head"><div><h3>${hotel.name}</h3><small>${hotel.location}</small></div><span style="font-size:12px">12PM Policy</span></div><div class="room-grid" id="g-${hotel.id}"></div>`;c.appendChild(card);let grid=card.querySelector(`#g-${hotel.id}`);hotel.rooms.forEach(room=>{let avail=getAvailable(hotel.id,room.id);let col=avail>2?'green':avail>0?'yellow':'red';let el=document.createElement('div');el.className='room';el.innerHTML=`<div style="display:flex;justify-content:space-between"><b>${room.type}</b><span class="avail ${col}">${avail>0?avail+' left':'Sold out'}</span></div><div style="margin:8px 0;font-weight:700">₦${room.price.toLocaleString()} / night</div><div class="booking"><input type="date" id="in-${room.id}"><input type="date" id="out-${room.id}"><button class="book-btn" ${avail<=0?'disabled':''} onclick="bookRoom('${hotel.id}','${room.id}')">Book on WhatsApp</button></div><small style="color:#64748b">Check-in 12PM • Check-out 12PM next day • Room auto-returns at 12PM checkout</small>`;grid.appendChild(el);let t=new Date();let tmr=new Date();tmr.setDate(t.getDate()+1);let tmr2=new Date();tmr2.setDate(t.getDate()+2);if(new Date().getHours()>=12){tmr.setDate(tmr.getDate()+1);tmr2.setDate(tmr2.getDate()+1)}el.querySelector(`#in-${room.id}`).valueAsDate=tmr;el.querySelector(`#out-${room.id}`).valueAsDate=tmr2;});});}
+function bookRoom(hId,rId){let hotels=getHotels();let h=hotels.find(x=>x.id===hId);let r=h.rooms.find(x=>x.id===rId);let cin=document.getElementById(`in-${rId}`).value;let cout=document.getElementById(`out-${rId}`).value;if(!cin||!cout)return alert('Pick dates');let checkin=new Date(cin+'T12:00:00');let checkout=new Date(cout+'T12:00:00');if(checkout<=checkin)return alert('Check-out must be after check-in');let nights=Math.round((checkout-checkin)/86400000);let total=nights*r.price;let bookings=getBookings();bookings.push({id:'b'+Date.now(),hotelId:hId,roomId:rId,hotelName:h.name,roomType:r.type,price:r.price,checkinDate:cin,checkoutDate:cout,checkinDateTime:checkin.toISOString(),checkoutDateTime:checkout.toISOString(),nights,total,status:'pending',createdAt:new Date().toISOString()});saveBookings(bookings);let msg=`Hello FiveClover,%0AHotel: ${h.name}%0ARoom: ${r.type}%0ACheck-in: ${cin} 12PM%0ACheck-out: ${cout} 12PM%0A${nights} night(s) - ₦${total.toLocaleString()}`;window.open(`https://wa.me/2340000000000?text=${msg}`,'_blank');alert('Saved as PENDING. Admin must confirm to reduce room.');render();}render();
 </script>
 </body>
 </html>
