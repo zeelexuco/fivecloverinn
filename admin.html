@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin V2.6</title><style>*{box-sizing:border-box;font-family:system-ui}body{background:#f1f5f9;margin:0;padding:16px}.card{background:#fff;padding:16px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}input,select,textarea,button{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;margin:6px 0}button{background:#0f172a;color:#fff;font-weight:700;cursor:pointer}button.green{background:#16a34a}button.red{background:#dc2626}.thumb{width:100%;height:140px;object-fit:cover;border-radius:8px;background:#f1f5f9}</style></head><body>
-<div id="loginBox" class="card" style="max-width:380px;margin:70px auto"><h3>Admin Login</h3><input type="password" id="pwd" placeholder="Password"><button onclick="login()">Login</button><p style="font-size:11px;color:#64748b">Hint: default clover2025, change it in code</p></div>
+<div id="loginBox" class="card" style="max-width:380px;margin:70px auto"><h3>Admin Login</h3><input type="password" id="pwd" placeholder="Password"><button onclick="login()">Login</button><div id="loginBox" class="card" style="max-width:380px;margin:70px auto"><h3>Admin Login</h3><input type="password" id="pwd" placeholder="Password"><button onclick="login()">Login</button></div>
 <div id="adminBox" style="display:none;max-width:1000px;margin:0 auto"><h2>☘️ FiveClover Admin V2.6 - Pics + Reviews</h2>
 
 <div class="card"><h3>Add Hotel + Picture</h3><input id="hotelName" placeholder="Hotel Name"><input id="hotelLoc" placeholder="Location"><input id="hotelPic" type="file" accept="image/*"><small>Pick hotel main picture</small><button class="green" onclick="addHotel()">Add Hotel</button></div>
@@ -16,7 +16,7 @@
 </div>
 
 <script>
-const PWD='clover2025'; // CHANGE YOUR PASSWORD HERE
+const PWD='clover12345678'; // CHANGE YOUR PASSWORD HERE
 function login(){if(document.getElementById('pwd').value===PWD){loginBox.style.display='none';adminBox.style.display='block';load()}else alert('Wrong password')}
 function getHotels(){return JSON.parse(localStorage.getItem('fiveclover_hotels')||'[]')}function saveHotels(h){localStorage.setItem('fiveclover_hotels',JSON.stringify(h))}
 function getBookings(){return JSON.parse(localStorage.getItem('fiveclover_bookings')||'[]')}function saveBookings(b){localStorage.setItem('fiveclover_bookings',JSON.stringify(b))}
