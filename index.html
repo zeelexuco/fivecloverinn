@@ -1,121 +1,124 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FiveClover Inn - Hotels in Lagos</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FiveClover Inn - Search Hotels</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif}
-body{background:#f6f7fb;color:#111}
-.header{background:#0f172a;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
-.hero{padding:28px 20px;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff}
-.container{padding:16px;max-width:1100px;margin:0 auto}
-.hotel-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06);margin-bottom:20px;cursor:pointer;transition:.2s}
-.hotel-card:hover{transform:translateY(-3px)}
-.hotel-head{padding:16px;display:flex;justify-content:space-between;border-bottom:1px solid #eee}
-.room-grid{display:grid;grid-template-columns:1fr;gap:14px;padding:16px}
-@media(min-width:700px){.room-grid{grid-template-columns:1fr 1fr}}
-.room{background:#f8fafc;border-radius:12px;padding:12px;border:1px solid #e2e8f0}
-.avail{font-size:12px;padding:4px 8px;border-radius:20px;font-weight:600}
-.green{background:#dcfce7;color:#166534}.yellow{background:#fef9c3;color:#854d0e}.red{background:#fee2e2;color:#991b1b}
-.booking{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.booking input{padding:10px;border-radius:8px;border:1px solid #cbd5e1;width:100%}
-.book-btn{grid-column:1/-1;background:#0f172a;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:600;cursor:pointer}
-.book-btn:disabled{background:#94a3b8}
-.hotel-img{width:100%;height:200px;object-fit:cover;display:block}
-.room-img{width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:8px;background:#e2e8f0}
-.back-btn{background:#fff;border:1px solid #e2e8f0;padding:10px 16px;border-radius:10px;cursor:pointer;margin-bottom:12px;font-weight:600}
-.hidden{display:none}
-.hotel-list-grid{display:grid;grid-template-columns:1fr;gap:18px}
-@media(min-width:700px){.hotel-list-grid{grid-template-columns:1fr 1fr}}
+*{box-sizing:border-box;font-family:system-ui}body{margin:0;background:#f8fafc;padding:0}
+.header{background:#0f172a;color:#fff;padding:18px 16px;text-align:center;position:sticky;top:0;z-index:10}
+.search-box{background:#fff;padding:14px;position:sticky;top:72px;z-index:9;box-shadow:0 2px 10px rgba(0,0,0,.08);display:grid;gap:10px}
+.row{display:flex;gap:8px}
+input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px}
+button{padding:12px 14px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+.btn-dark{background:#0f172a;color:#fff}.btn-green{background:#16a34a;color:#fff;width:100%}
+.card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.06);margin-bottom:14px;cursor:pointer}
+.card img{width:100%;height:180px;object-fit:cover;background:#e2e8f0}
+.card-body{padding:12px}
+.badge{display:inline-block;background:#e0f2fe;color:#0c4a6e;padding:4px 8px;border-radius:999px;font-size:12px;margin-right:6px}
+.grid{padding:12px;max-width:1000px;margin:0 auto}
+.room-card{border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-top:10px;background:#f8fafc}
+.back{margin:12px 0}
 </style>
-</head>
-<body>
-<div class="header"><b>☘️ FiveClover</b> <span style="font-size:12px;opacity:.7">Lagos Hotels</span></div>
-
-<div class="hero" id="heroBox">
-<h1>Hotels in Lagos</h1><p>Tap a hotel to see rooms • Check-in 12PM • Check-out 12PM</p>
+</head><body>
+<div class="header">
+<h2 style="margin:0">☘️ FiveClover Inn</h2>
+<small>Search hotel near you - Lagos</small>
 </div>
 
-<div class="container">
-  <!-- LIST VIEW -->
-  <div id="listView"><div class="hotel-list-grid" id="hotelsContainer"></div></div>
+<div class="search-box" id="searchBox">
+<div class="row">
+<input id="qName" placeholder="🔍 Search hotel name e.g Caritas">
+<input id="qLoc" placeholder="📍 Location e.g Yaba, Lekki, Igbobi">
+</div>
+<div class="row">
+<select id="qRating"><option value="">⭐ Any Rating</option><option value="4">⭐ 4+ Stars</option><option value="3">⭐ 3+ Stars</option><option value="2">⭐ 2+ Stars</option></select>
+<select id="qSort"><option value="">Sort: Near You</option><option value="priceLow">Price Low → High</option><option value="priceHigh">Price High → Low</option><option value="rating">Highest Rating</option></select>
+<button class="btn-dark" onclick="doSearch()">Search</button>
+</div>
+<button onclick="useNearMe()" style="background:#fef3c7;width:100%">📍 Use My Location (Find hotels near me)</button>
+</div>
 
-  <!-- DETAIL VIEW -->
-  <div id="detailView" class="hidden">
-    <button class="back-btn" onclick="showList()">← Back to all hotels</button>
-    <div id="detailCard"></div>
-  </div>
+<div class="grid">
+<div id="breadcrumb"></div>
+<div id="hotelsGrid"></div>
 </div>
 
 <script>
-const defaultHotels=[{id:'h1',name:'Demo - Add Your Hotel in Admin',location:'Gwarinpa, Abuja',whatsapp:'2348123456789',image:'',rooms:[{id:'r1',type:'Standard Room',price:15000,total:5,image:''}]}];
-function getHotels(){let d=localStorage.getItem('fiveclover_hotels');if(!d){localStorage.setItem('fiveclover_hotels',JSON.stringify(defaultHotels));return defaultHotels}return JSON.parse(d)}
-function getBookings(){return JSON.parse(localStorage.getItem('fiveclover_bookings')||'[]')}
-function saveBookings(b){localStorage.setItem('fiveclover_bookings',JSON.stringify(b))}
-function cleanExpired(){let b=getBookings();let now=new Date();let f=b.filter(x=>{if(x.status==='confirmed'){if(now>=new Date(x.checkoutDateTime))return false}return true});if(f.length!==b.length)saveBookings(f)}cleanExpired();setInterval(cleanExpired,60000);
-function getAvailable(hId,rId){let h=getHotels().find(x=>x.id===hId);if(!h)return 0;let r=h.rooms.find(x=>x.id===rId);if(!r)return 0;let count=getBookings().filter(x=>x.hotelId===hId&&x.roomId===rId&&x.status==='confirmed').length;return r.total-count}
-
-function showList(){
- document.getElementById('listView').classList.remove('hidden');
- document.getElementById('detailView').classList.add('hidden');
- document.getElementById('heroBox').innerHTML='<h1>Hotels in Lagos</h1><p>Tap a hotel to see rooms • Check-in 12PM • Check-out 12PM</p>';
- window.scrollTo(0,0);
+function getHotels(){
+ let d=localStorage.getItem('fiveclover_hotels');
+ if(!d){
+  let demo=[{id:'demo1',name:'Demo - Add Your Hotel in Admin',location:'Lagos',whatsapp:'2340000000000',image:'',rooms:[{id:'r1',type:'STANDARD',price:25000,total:5,image:''}],rating:4.5}];
+  localStorage.setItem('fiveclover_hotels',JSON.stringify(demo)); return demo;
+ }
+ try{return JSON.parse(d)}catch(e){return []}
 }
-function showHotel(hId){
- let hotel=getHotels().find(x=>x.id===hId);
- if(!hotel)return;
- document.getElementById('listView').classList.add('hidden');
- document.getElementById('detailView').classList.remove('hidden');
- document.getElementById('heroBox').innerHTML=`<h1>${hotel.name}</h1><p>${hotel.location} • WhatsApp: ${hotel.whatsapp||''}</p>`;
- let d=document.getElementById('detailCard');
- let hImg=hotel.image?`<img class="hotel-img" src="${hotel.image}" style="border-radius:16px;margin-bottom:12px">`:'';
- let roomsHtml=hotel.rooms.map(room=>{
-   let avail=getAvailable(hotel.id,room.id);
-   let col=avail>2?'green':avail>0?'yellow':'red';
-   let rImg=room.image?`<img class="room-img" src="${room.image}">`:'';
-   return `<div class="room">${rImg}<div style="display:flex;justify-content:space-between"><b>${room.type}</b><span class="avail ${col}">${avail>0?avail+' left':'Sold out'}</span></div><div style="margin:8px 0;font-weight:700">₦${room.price.toLocaleString()} / night</div><div class="booking"><input type="date" id="in-${room.id}"><input type="date" id="out-${room.id}"><button class="book-btn" ${avail<=0?'disabled':''} onclick="bookRoom('${hotel.id}','${room.id}')">Book on WhatsApp</button></div><small style="color:#64748b">Check-in 12PM • Check-out 12PM next day</small></div>`;
- }).join('') || '<p>No rooms yet for this hotel.</p>';
- d.innerHTML=`${hImg}<div class="hotel-card" style="cursor:default"><div class="hotel-head"><div><h3>${hotel.name}</h3><small>${hotel.location}</small></div><span>Rooms: ${hotel.rooms.length}</span></div><div class="room-grid">${roomsHtml}</div></div>`;
- // set dates
- hotel.rooms.forEach(room=>{
-   let elIn=document.getElementById(`in-${room.id}`); if(!elIn)return;
-   let t=new Date();let tmr=new Date();tmr.setDate(t.getDate()+1);let tmr2=new Date();tmr2.setDate(t.getDate()+2);
-   if(new Date().getHours()>=12){tmr.setDate(tmr.getDate()+1);tmr2.setDate(tmr2.getDate()+1)}
-   elIn.valueAsDate=tmr; document.getElementById(`out-${room.id}`).valueAsDate=tmr2;
+function getReviews(){return JSON.parse(localStorage.getItem('fiveclover_reviews')||'[]')}
+function avgRating(hotelId){
+ let rs=getReviews().filter(r=>r.hotelId===hotelId);
+ if(!rs.length) return 4.2;
+ return (rs.reduce((a,b)=>a+b.rating,0)/rs.length).toFixed(1);
+}
+let currentHotel=null;
+let userLoc=null;
+
+function doSearch(){ renderHotels(); }
+function useNearMe(){
+ if(!navigator.geolocation) return alert('Geolocation not supported');
+ navigator.geolocation.getCurrentPosition(pos=>{
+  userLoc={lat:pos.coords.latitude,lng:pos.coords.longitude};
+  alert('Location grabbed! Now we sort by your area. Type your area name like "Yaba" for better result.');
+  renderHotels();
+ },()=>alert('Allow location to use near you'));
+}
+
+function renderHotels(){
+ let all=getHotels();
+ let qName=document.getElementById('qName').value.toLowerCase().trim();
+ let qLoc=document.getElementById('qLoc').value.toLowerCase().trim();
+ let qRating=parseFloat(document.getElementById('qRating').value||0);
+ let qSort=document.getElementById('qSort').value;
+
+ let filtered=all.filter(h=>{
+  if(h.name.toLowerCase().includes('demo -') && all.length>1) return false;
+  if(qName &&!h.name.toLowerCase().includes(qName)) return false;
+  if(qLoc &&!h.location.toLowerCase().includes(qLoc)) return false;
+  if(qRating && parseFloat(avgRating(h.id))<qRating) return false;
+  return true;
  });
- window.scrollTo(0,0);
+
+ if(qSort==='priceLow') filtered.sort((a,b)=> (a.rooms[0]?.price||999999)-(b.rooms[0]?.price||999999));
+ if(qSort==='priceHigh') filtered.sort((a,b)=> (b.rooms[0]?.price||0)-(a.rooms[0]?.price||0));
+ if(qSort==='rating') filtered.sort((a,b)=> avgRating(b.id)-avgRating(a.id));
+
+ document.getElementById('breadcrumb').innerHTML=`<small>${filtered.length} hotel(s) found ${qLoc? 'near '+qLoc:''} ${qName? 'for "'+qName+'"':''}</small>`;
+ currentHotel=null; document.getElementById('searchBox').style.display='grid';
+ document.getElementById('hotelsGrid').innerHTML=filtered.map(h=>{
+  let cheapest=Math.min(...h.rooms.map(r=>r.price));
+  return `<div class="card" onclick="openHotel('${h.id}')">
+   ${h.image?`<img src="${h.image}">`:`<div style="height:180px;background:#e2e8f0;display:flex;align-items:center;justify-content:center">🏨 No Image</div>`}
+   <div class="card-body">
+    <b>${h.name}</b><br>
+    <small>📍 ${h.location} • ⭐ ${avgRating(h.id)} rating</small><br>
+    <span class="badge">${h.rooms.length} room types</span>
+    <span class="badge">From ₦${(isFinite(cheapest)?cheapest:0).toLocaleString()}</span>
+    <br><small style="color:#16a34a">Click to see rooms →</small>
+   </div>
+  </div>`
+ }).join('')||'<div style="text-align:center;padding:40px"><h3>No hotels found</h3><p>Try search "Yaba" or "Lekki" or clear search</p><button class="btn-dark" onclick="clearSearch()">Clear Search</button></div>';
 }
 
-function renderList(){
- let hotels=getHotels();let c=document.getElementById('hotelsContainer');c.innerHTML='';
- if(hotels.length===0){c.innerHTML='<p>No hotels yet.</p>';return}
- hotels.forEach(hotel=>{
-   let availTotal=hotel.rooms.reduce((s,r)=>s+getAvailable(hotel.id,r.id),0);
-   let hImg=hotel.image?`<img class="hotel-img" src="${hotel.image}">`:`<div class="hotel-img" style="background:#e2e8f0;display:flex;align-items:center;justify-content:center">No Image</div>`;
-   let card=document.createElement('div');card.className='hotel-card';
-   card.onclick=()=>showHotel(hotel.id);
-   card.innerHTML=`${hImg}<div class="hotel-head"><div><h3>${hotel.name}</h3><small>${hotel.location}</small><br><small style="color:#16a34a">● ${availTotal} rooms available • Tap to view</small></div><div style="text-align:right"><small>12PM<br>Policy</small></div></div>`;
-   c.appendChild(card);
- });
+function clearSearch(){document.getElementById('qName').value='';document.getElementById('qLoc').value='';document.getElementById('qRating').value='';document.getElementById('qSort').value='';renderHotels();}
+function openHotel(id){
+ let h=getHotels().find(x=>x.id===id); if(!h)return;
+ currentHotel=h; document.getElementById('searchBox').style.display='none';
+ document.getElementById('breadcrumb').innerHTML=`<button class="btn-dark back" onclick="renderHotels()">← Back to Search</button><h3>${h.name}</h3><small>📍 ${h.location} • ⭐ ${avgRating(h.id)} • WhatsApp: ${h.whatsapp||'Not set'}</small>`;
+ document.getElementById('hotelsGrid').innerHTML=h.rooms.map(r=>`
+  <div class="room-card">
+   ${r.image?`<img src="${r.image}" style="width:100%;height:150px;object-fit:cover;border-radius:10px;margin-bottom:8px">`:''}
+   <b>${r.type}</b> - ₦${r.price.toLocaleString()} / night<br>
+   <small>${r.total} rooms available • ⭐ ${avgRating(h.id)}</small><br><br>
+   <a href="https://wa.me/${h.whatsapp}?text=Hello%20${encodeURIComponent(h.name)}%20I%20want%20to%20book%20${encodeURIComponent(r.type)}%20for%20₦${r.price}" target="_blank"><button class="btn-green">Book via WhatsApp</button></a>
+  </div>`).join('')||'<p>No rooms added for this hotel yet.</p>';
 }
 
-function bookRoom(hId,rId){
- let hotels=getHotels();let h=hotels.find(x=>x.id===hId);let r=h.rooms.find(x=>x.id===rId);
- let cin=document.getElementById(`in-${rId}`).value;let cout=document.getElementById(`out-${rId}`).value;
- if(!cin||!cout)return alert('Pick dates');
- let checkin=new Date(cin+'T12:00:00');let checkout=new Date(cout+'T12:00:00');
- if(checkout<=checkin)return alert('Check-out must be after check-in');
- let nights=Math.round((checkout-checkin)/86400000);let total=nights*r.price;
- let bookings=getBookings();bookings.push({id:'b'+Date.now(),hotelId:hId,roomId:rId,hotelName:h.name,roomType:r.type,price:r.price,checkinDate:cin,checkoutDate:cout,checkinDateTime:checkin.toISOString(),checkoutDateTime:checkout.toISOString(),nights,total,status:'pending',createdAt:new Date().toISOString()});saveBookings(bookings);
- let waNumber=(h.whatsapp||'2340000000000').replace(/[^0-9]/g,'');
- let msg=`Hello ${h.name},%0A%0AI want to book:%0AHotel: ${h.name}%0ARoom: ${r.type}%0ACheck-in: ${cin} 12PM%0ACheck-out: ${cout} 12PM%0A${nights} night(s) - ₦${total.toLocaleString()}%0A%0APlease confirm.`;
- window.open(`https://wa.me/${waNumber}?text=${msg}`,'_blank');
- alert('Sent to '+h.name+' on WhatsApp. Pending confirmation.');
- renderList();
-}
-renderList();
+renderHotels();
 </script>
-</body>
-</html>
+</body></html>
