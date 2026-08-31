@@ -1,86 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FiveClover - Live Search</title>
-<style>
-*{box-sizing:border-box;font-family:system-ui}body{margin:0;background:#f8fafc}
-header{background:#0f172a;color:#fff;padding:14px 16px;position:sticky;top:0;z-index:10}
-header h1{margin:0;font-size:18px}
-.searchBox{padding:12px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08);position:sticky;top:52px;z-index:9}
-input{width:100%;padding:14px;border:2px solid #0f172a;border-radius:10px;font-size:16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;padding:14px}
-.hotelCard{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07)}
-.hotelCard img{width:100%;height:170px;object-fit:cover;background:#e2e8f0}
-.hotelInfo{padding:12px}.hotelInfo h3{margin:0 0 4px}
-.badge{display:inline-block;background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:12px}
-.roomRow{display:flex;justify-content:space-between;padding:8px 12px;border-top:1px solid #f1f5f9}
-.btn{width:100%;background:#16a34a;color:#fff;border:none;padding:13px;font-weight:800;cursor:pointer;font-size:15px}
-#status{padding:10px;text-align:center;color:#64748b}
-</style>
-</head>
-<body>
-<header><h1>☘️ FiveClover - Live Cloud</h1><small>YABA | IGBOBI | LEKKI</small></header>
-<div class="searchBox"><input id="searchInput" placeholder="Search YABA, IGBOBI, LEKKI, CARITAS..." oninput="doSearch()"></div>
-<div id="status">Connecting to cloud...</div>
-<div id="hotelsGrid" class="grid"></div>
-
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>FiveClover - Find Hotels</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box;font-family:'Outfit',system-ui}body{margin:0;background:#f8fafc}header{background:#0f172a;color:#fff;padding:20px;text-align:center}header h1{margin:0}.searchBox{background:#fff;padding:14px;margin:-20px 16px 10px;border-radius:14px;box-shadow:0 8px 20px rgba(0,0,0,.1);display:flex;gap:8px}input{flex:1;padding:12px;border-radius:10px;border:1.5px solid #e2e8f0}button{padding:12px 16px;border-radius:10px;border:none;background:#16a34a;color:#fff;font-weight:700}.card{background:#fff;border-radius:16px;overflow:hidden;margin:12px 16px;box-shadow:0 4px 14px rgba(0,0,0,.06);border:1px solid #e2e8f0}.card img{width:100%;height:180px;object-fit:cover}.card .info{padding:12px}.room{background:#f1f5f9;padding:8px 10px;border-radius:8px;margin:6px 0;display:flex;justify-content:space-between}</style></head><body>
+<header><h1>☘️ FiveClover</h1><p>Find hotels near IGBOBI, YABA, JIBOWU</p><small>Live Cloud Mode</small></header>
+<div class="searchBox"><input id="q" placeholder="Search IGBOBI, YABA, JIBOWU..." oninput="filterHotels()"><button onclick="filterHotels()">Search</button></div>
+<div id="list" style="padding-bottom:40px"><p style="text-align:center;opacity:.5">Loading hotels...</p></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDzVRHwXgZXZmlX7KIehTLb1n-ZjGJwWfI",
-  authDomain: "fiveclover-237bb.firebaseapp.com",
-  projectId: "fiveclover-237bb",
-  storageBucket: "fiveclover-237bb.firebasestorage.app",
-  messagingSenderId: "337287455721",
-  appId: "1:337287455721:web:ebbb8fd23959b1b0922178",
-  measurementId: "G-G2EG4G3YLZ"
+const firebaseConfig = { apiKey:"AIzaSyDzVRHwXgZXZmlX7KIehTLb1n-ZjGJwWfI", authDomain:"fiveclover-237bb.firebaseapp.com", projectId:"fiveclover-237bb", storageBucket:"fiveclover-237bb.firebasestorage.app", messagingSenderId:"337287455721", appId:"1:337287455721:web:ebbb8fd23959b1b0922178" };
+const app=initializeApp(firebaseConfig); const db=getFirestore(app);
+let all=[];
+onSnapshot(collection(db,"hotels"), s=>{
+  all=[]; s.forEach(d=>all.push({id:d.id,...d.data()})); filterHotels();
+});
+window.filterHotels=()=>{
+  let q=document.getElementById('q').value.toLowerCase();
+  let f=all.filter(h=> (h.name+h.location).toLowerCase().includes(q));
+  document.getElementById('list').innerHTML = f.map(h=>`<div class="card"><img src="${h.image}"><div class="info"><b>${h.name}</b><br><small>${h.location}</small><br><small>WhatsApp: ${h.whatsapp}</small>
+  ${(h.rooms||[]).map(r=>`<div class="room"><span>${r.type} - ₦${r.price}</span><a href="https://wa.me/${h.whatsapp}?text=Hello, I want to book ${r.type} at ${h.name} for ₦${r.price}" target="_blank" style="background:#16a34a;color:#fff;padding:4px 10px;border-radius:20px;text-decoration:none;font-size:12px">Book</a></div>`).join('')}
+  </div></div>`).join('') || '<p style="text-align:center;margin-top:30px">No hotel found for "'+q+'". Try IGBOBI</p>';
 };
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-let allHotels = [];
-const grid = document.getElementById('hotelsGrid');
-const status = document.getElementById('status');
-
-const unsub = onSnapshot(collection(db, "hotels"), 
-  (snap) => {
-    allHotels = [];
-    snap.forEach(d => allHotels.push({id:d.id, ...d.data()}));
-    status.textContent = `Found ${allHotels.length} hotel(s) in cloud`;
-    render(allHotels);
-  },
-  (err) => {
-    status.textContent = "ERROR: " + err.message + " - Check Firestore Rules allow read if true";
-    console.error(err);
-  }
-);
-
-window.doSearch = () => {
-  let q = document.getElementById('searchInput').value.toLowerCase().trim();
-  if(!q) return render(allHotels);
-  let f = allHotels.filter(h => 
-    (h.location||'').toLowerCase().includes(q) || 
-    (h.name||'').toLowerCase().includes(q)
-  );
-  render(f);
-};
-
-function render(list){
-  if(list.length==0){ grid.innerHTML = `<p style="padding:20px">No hotel found. Try IGBOBI</p>`; return; }
-  grid.innerHTML = list.map(h=>`
-    <div class="hotelCard">
-      <img src="${h.image||'https://via.placeholder.com/400x200?text=FiveClover'}">
-      <div class="hotelInfo"><h3>${h.name}</h3><small>📍 ${h.location}</small><br><span class="badge">${(h.rooms||[]).length} Room Types</span></div>
-      ${(h.rooms||[]).map(r=>`<div class="roomRow"><span>${r.type} - ₦${Number(r.price).toLocaleString()}</span><small>${r.total} rooms</small></div>`).join('')}
-      <button class="btn" onclick="book('${h.whatsapp}','${h.name}')">Book on WhatsApp</button>
-    </div>
-  `).join('');
-}
-window.book = (num,name)=>{ let msg=encodeURIComponent(`Hello, I want to book ${name} at FiveClover`); window.open(`https://wa.me/${num}?text=${msg}`,'_blank'); }
-</script>
-</body>
-</html>
+</script></body></html>
