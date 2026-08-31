@@ -1,17 +1,34 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Cloud V5</title>
-<style>*{box-sizing:border-box;font-family:system-ui}body{background:#f1f5f9;margin:0;padding:16px}.card{background:#fff;padding:16px;border-radius:12px;margin-bottom:12px}input,select,button{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;margin:6px 0}button{background:#0f172a;color:#fff;font-weight:700}button.green{background:#16a34a}button.red{background:#dc2626;width:auto}</style>
-</head><body>
-<div id="loginBox" class="card" style="max-width:380px;margin:70px auto"><h3>Admin Login</h3><input type="password" id="pwd" placeholder="Password"><button onclick="login()">Login</button></div>
-<div id="adminBox" style="display:none;max-width:1000px;margin:0 auto">
-<h2>☘️ Admin CLOUD V5 - Live for all customers</h2>
-<div class="card"><h3>Add Hotel</h3><input id="hName" placeholder="Hotel Name"><input id="hLoc" placeholder="Location e.g YABA"><input id="hW" placeholder="WhatsApp 234..."><input id="hPic" type="file" accept="image/*"><button class="green" onclick="addHotel()">Add Hotel to CLOUD</button></div>
-<div class="card"><h3>Add Room</h3><select id="hSelect"><option value="">Select Hotel</option></select><input id="rType" placeholder="Room Type"><input id="rPrice" placeholder="Price"><input id="rTotal" placeholder="Total Rooms"><input id="rPic" type="file" accept="image/*"><button class="green" onclick="addRoom()">Add Room to CLOUD</button></div>
-<div class="card"><h3>Live Hotels (Cloud)</h3><div id="list"></div></div>
-<div class="card"><a href="./"><button>View Customer Site</button></a></div>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FiveClover - Live Search</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui}body{margin:0;background:#f8fafc}
+header{background:#0f172a;color:#fff;padding:14px 16px;position:sticky;top:0;z-index:10}
+header h1{margin:0;font-size:18px}
+.searchBox{padding:12px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08);position:sticky;top:52px;z-index:9}
+input{width:100%;padding:14px;border:2px solid #0f172a;border-radius:10px;font-size:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;padding:14px}
+.hotelCard{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.hotelCard img{width:100%;height:170px;object-fit:cover;background:#e2e8f0}
+.hotelInfo{padding:12px}.hotelInfo h3{margin:0 0 4px}
+.badge{display:inline-block;background:#dcfce7;color:#166534;padding:2px 8px;border-radius:20px;font-size:12px}
+.roomRow{display:flex;justify-content:space-between;padding:8px 12px;border-top:1px solid #f1f5f9}
+.btn{width:100%;background:#16a34a;color:#fff;border:none;padding:13px;font-weight:800;cursor:pointer;font-size:15px}
+#status{padding:10px;text-align:center;color:#64748b}
+</style>
+</head>
+<body>
+<header><h1>☘️ FiveClover - Live Cloud</h1><small>YABA | IGBOBI | LEKKI</small></header>
+<div class="searchBox"><input id="searchInput" placeholder="Search YABA, IGBOBI, LEKKI, CARITAS..." oninput="doSearch()"></div>
+<div id="status">Connecting to cloud...</div>
+<div id="hotelsGrid" class="grid"></div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, arrayUnion, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyDzVRHwXgZXZmlX7KIehTLb1n-ZjGJwWfI",
   authDomain: "fiveclover-237bb.firebaseapp.com",
@@ -21,37 +38,49 @@ const firebaseConfig = {
   appId: "1:337287455721:web:ebbb8fd23959b1b0922178",
   measurementId: "G-G2EG4G3YLZ"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-window.login=()=>{if(document.getElementById('pwd').value==='clover2025'){document.getElementById('loginBox').style.display='none';document.getElementById('adminBox').style.display='block';load();}else alert('Wrong');}
-function toBase64(f){return new Promise(res=>{if(!f) return res(''); let r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f);})}
-window.addHotel=async()=>{
-  let n=document.getElementById('hName').value.trim(), l=document.getElementById('hLoc').value.trim(), w=document.getElementById('hW').value.trim().replace(/[^0-9]/g,''), file=document.getElementById('hPic').files[0];
-  if(!n||!l) return alert('Name + Location needed');
-  let pic=await toBase64(file);
-  await addDoc(collection(db,"hotels"),{name:n,location:l.toUpperCase(),whatsapp:w,image:pic,rooms:[]});
-  document.getElementById('hName').value='';document.getElementById('hLoc').value='';document.getElementById('hW').value='';document.getElementById('hPic').value='';
-  alert('Hotel added to CLOUD! All customers go see am now');
+
+let allHotels = [];
+const grid = document.getElementById('hotelsGrid');
+const status = document.getElementById('status');
+
+const unsub = onSnapshot(collection(db, "hotels"), 
+  (snap) => {
+    allHotels = [];
+    snap.forEach(d => allHotels.push({id:d.id, ...d.data()}));
+    status.textContent = `Found ${allHotels.length} hotel(s) in cloud`;
+    render(allHotels);
+  },
+  (err) => {
+    status.textContent = "ERROR: " + err.message + " - Check Firestore Rules allow read if true";
+    console.error(err);
+  }
+);
+
+window.doSearch = () => {
+  let q = document.getElementById('searchInput').value.toLowerCase().trim();
+  if(!q) return render(allHotels);
+  let f = allHotels.filter(h => 
+    (h.location||'').toLowerCase().includes(q) || 
+    (h.name||'').toLowerCase().includes(q)
+  );
+  render(f);
+};
+
+function render(list){
+  if(list.length==0){ grid.innerHTML = `<p style="padding:20px">No hotel found. Try IGBOBI</p>`; return; }
+  grid.innerHTML = list.map(h=>`
+    <div class="hotelCard">
+      <img src="${h.image||'https://via.placeholder.com/400x200?text=FiveClover'}">
+      <div class="hotelInfo"><h3>${h.name}</h3><small>📍 ${h.location}</small><br><span class="badge">${(h.rooms||[]).length} Room Types</span></div>
+      ${(h.rooms||[]).map(r=>`<div class="roomRow"><span>${r.type} - ₦${Number(r.price).toLocaleString()}</span><small>${r.total} rooms</small></div>`).join('')}
+      <button class="btn" onclick="book('${h.whatsapp}','${h.name}')">Book on WhatsApp</button>
+    </div>
+  `).join('');
 }
-window.addRoom=async()=>{
-  let hid=document.getElementById('hSelect').value, t=document.getElementById('rType').value, p=parseInt(document.getElementById('rPrice').value.replace(/[^0-9]/g,'')), tot=parseInt(document.getElementById('rTotal').value.replace(/[^0-9]/g,'')), file=document.getElementById('rPic').files[0];
-  if(!hid||!t||!p||!tot) return alert('Fill all');
-  let pic=await toBase64(file);
-  let ref=doc(db,"hotels",hid);
-  // get current rooms
-  let hotelsSnap=await getDocs(collection(db,"hotels")); let cur=[]; hotelsSnap.forEach(d=>{if(d.id===hid) cur=d.data().rooms||[]});
-  cur.push({id:'r'+Date.now(),type:t,price:p,total:tot,image:pic});
-  await updateDoc(ref,{rooms:cur});
-  document.getElementById('rType').value='';document.getElementById('rPrice').value='';document.getElementById('rTotal').value='';document.getElementById('rPic').value='';
-  alert('Room added to cloud');
-}
-function load(){
-  onSnapshot(collection(db,"hotels"),snap=>{
-    let hotels=[]; snap.forEach(d=>hotels.push({id:d.id,...d.data()}));
-    let sel=document.getElementById('hSelect'); sel.innerHTML='<option value="">Select Hotel</option>'; hotels.forEach(h=>{let o=document.createElement('option');o.value=h.id;o.textContent=h.name+' - '+h.location;sel.appendChild(o);});
-    document.getElementById('list').innerHTML=hotels.map(h=>`<div style="border:1px solid #eee;padding:8px;margin-bottom:6px;border-radius:8px"><b>${h.name}</b> - ${h.location} (${h.rooms.length} rooms) <button class="red" onclick="delH('${h.id}')">Delete</button><ul>${h.rooms.map(r=>`<li>${r.type} ₦${r.price}</li>`).join('')}</ul></div>`).join('')||'No hotels yet - Add your 3 Caritas hotels now';
-  });
-}
-window.delH=async(id)=>{if(confirm('Delete?')) await deleteDoc(doc(db,"hotels",id));}
+window.book = (num,name)=>{ let msg=encodeURIComponent(`Hello, I want to book ${name} at FiveClover`); window.open(`https://wa.me/${num}?text=${msg}`,'_blank'); }
 </script>
-</body></html>
+</body>
+</html>
