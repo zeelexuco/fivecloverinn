@@ -1,57 +1,77 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin V2.6</title><style>*{box-sizing:border-box;font-family:system-ui}body{background:#f1f5f9;margin:0;padding:16px}.card{background:#fff;padding:16px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}input,select,textarea,button{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px;margin:6px 0}button{background:#0f172a;color:#fff;font-weight:700;cursor:pointer}button.green{background:#16a34a}button.red{background:#dc2626}.thumb{width:100%;height:140px;object-fit:cover;border-radius:8px;background:#f1f5f9}</style></head><body>
-<div id="loginBox" class="card" style="max-width:380px;margin:70px auto"><h3>Admin Login</h3><input type="password" id="pwd" placeholder="Password"><button onclick="login()">Login</button><div id="loginBox" class="card" style="max-width:380px;margin:70px auto"><h3>Admin Login</h3><input type="password" id="pwd" placeholder="Password"><button onclick="login()">Login</button></div>
-<div id="adminBox" style="display:none;max-width:1000px;margin:0 auto"><h2>☘️ FiveClover Admin V2.6 - Pics + Reviews</h2>
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin V2.7 Secure</title>
+<style>*{box-sizing:border-box;font-family:system-ui}body{background:#f1f5f9;margin:0;padding:16px}.card{background:#fff;padding:16px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}input,select,button{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;margin:6px 0}button{background:#0f172a;color:#fff;font-weight:700;cursor:pointer}button.green{background:#16a34a}button.red{background:#dc2626}</style>
+</head><body>
+<div id="loginBox" class="card" style="max-width:380px;margin:70px auto">
+<h3>Admin Login</h3>
+<input type="password" id="pwd" placeholder="Password">
+<button onclick="doLogin()">Login</button>
+</div>
 
-<div class="card"><h3>Add Hotel + Picture</h3><input id="hotelName" placeholder="Hotel Name"><input id="hotelLoc" placeholder="Location"><input id="hotelPic" type="file" accept="image/*"><small>Pick hotel main picture</small><button class="green" onclick="addHotel()">Add Hotel</button></div>
-
-<div class="card"><h3>Add Room + Price + Total + Room Picture</h3><select id="hotelSelect"></select><input id="roomType" placeholder="Room Type e.g Deluxe"><input id="roomPrice" type="number" placeholder="Price per night e.g 15000"><input id="roomTotal" type="number" placeholder="Total Rooms e.g 5"><input id="roomPic" type="file" accept="image/*"><small>Pick room picture</small><button class="green" onclick="addRoom()">Add Room</button></div>
-
+<div id="adminBox" style="display:none;max-width:1000px;margin:0 auto">
+<h2>☘️ FiveClover Admin V2.7</h2>
+<div class="card"><h3>Add Hotel + Picture</h3><input id="hotelName" placeholder="Hotel Name"><input id="hotelLoc" placeholder="Location"><input id="hotelPic" type="file" accept="image/*"><button class="green" onclick="addHotel()">Add Hotel</button></div>
+<div class="card"><h3>Add Room (Fix: price can be 43,900)</h3><select id="hotelSelect"></select><input id="roomType" placeholder="Room Type e.g STANDARD"><input id="roomPrice" placeholder="Price e.g 43900 or 43,900"><input id="roomTotal" placeholder="Total Rooms e.g 5"><input id="roomPic" type="file" accept="image/*"><button class="green" onclick="addRoom()">Add Room</button></div>
 <div class="card"><h3>Hotels Live</h3><div id="hotelsList"></div></div>
-
-<div class="card"><h3>Bookings (5→4→5 @12PM)</h3><div id="bookingsList" style="overflow:auto"></div></div>
-
-<div class="card"><h3>Customer Reviews & Ratings</h3><div id="reviewsList"></div></div>
-
+<div class="card"><h3>Bookings</h3><div id="bookingsList"></div></div>
+<div class="card"><h3>Reviews</h3><div id="reviewsList"></div></div>
 <div class="card"><a href="index.html"><button>View Customer Site</button></a></div>
 </div>
 
 <script>
-const PWD='clover12345678'; // CHANGE YOUR PASSWORD HERE
-function login(){if(document.getElementById('pwd').value===PWD){loginBox.style.display='none';adminBox.style.display='block';load()}else alert('Wrong password')}
-function getHotels(){return JSON.parse(localStorage.getItem('fiveclover_hotels')||'[]')}function saveHotels(h){localStorage.setItem('fiveclover_hotels',JSON.stringify(h))}
-function getBookings(){return JSON.parse(localStorage.getItem('fiveclover_bookings')||'[]')}function saveBookings(b){localStorage.setItem('fiveclover_bookings',JSON.stringify(b))}
-function getReviews(){return JSON.parse(localStorage.getItem('fiveclover_reviews')||'[]')}function saveReviews(r){localStorage.setItem('fiveclover_reviews',JSON.stringify(r))}
-function fileToBase64(file){return new Promise(res=>{let fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(file)})}
-
+const PWD='clover2025'; // CHANGE TO YOUR OWN PASSWORD HERE e.g 'MyNewPass123!'
+function doLogin(){
+  let v=document.getElementById('pwd').value;
+  if(v===PWD){
+    document.getElementById('loginBox').style.display='none';
+    document.getElementById('adminBox').style.display='block';
+    load();
+  } else {
+    alert('Wrong password. Default is clover2025');
+  }
+}
+function getHotels(){return JSON.parse(localStorage.getItem('fiveclover_hotels')||'[]')}
+function saveHotels(h){localStorage.setItem('fiveclover_hotels',JSON.stringify(h))}
+function getBookings(){return JSON.parse(localStorage.getItem('fiveclover_bookings')||'[]')}
+function saveBookings(b){localStorage.setItem('fiveclover_bookings',JSON.stringify(b))}
+function getReviews(){return JSON.parse(localStorage.getItem('fiveclover_reviews')||'[]')}
+function saveReviews(r){localStorage.setItem('fiveclover_reviews',JSON.stringify(r))}
+function fileToBase64(f){return new Promise(res=>{let fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(f)})}
 async function addHotel(){
-  let n=hotelName.value.trim(), l=hotelLoc.value.trim(), f=hotelPic.files[0];
+  let n=document.getElementById('hotelName').value.trim();
+  let l=document.getElementById('hotelLoc').value.trim();
+  let file=document.getElementById('hotelPic').files[0];
   if(!n)return alert('Hotel name needed');
-  let pic=''; if(f) pic=await fileToBase64(f);
-  let hs=getHotels(); hs.push({id:'h'+Date.now(),name:n,location:l,image:pic,rooms:[]}); saveHotels(hs);
-  hotelName.value='';hotelLoc.value='';hotelPic.value=''; load();
+  let pic=''; if(file) pic=await fileToBase64(file);
+  let hs=getHotels(); hs.push({id:'h'+Date.now(),name:n,location:l,image:pic,rooms:[]});
+  saveHotels(hs); document.getElementById('hotelName').value='';document.getElementById('hotelLoc').value='';document.getElementById('hotelPic').value=''; load();
 }
 async function addRoom(){
-  let hid=hotelSelect.value, t=roomType.value, p=parseInt(roomPrice.value), tot=parseInt(roomTotal.value), f=roomPic.files[0];
-  if(!hid||!t||!p||!tot)return alert('Fill all');
-  let pic=''; if(f) pic=await fileToBase64(f);
-  let hs=getHotels(); let h=hs.find(x=>x.id===hid); h.rooms.push({id:'r'+Date.now(),type:t,price:p,total:tot,image:pic}); saveHotels(hs);
-  roomType.value='';roomPrice.value='';roomTotal.value='';roomPic.value=''; load();
+  let hid=document.getElementById('hotelSelect').value;
+  let t=document.getElementById('roomType').value.trim();
+  let pRaw=document.getElementById('roomPrice').value;
+  let totRaw=document.getElementById('roomTotal').value;
+  let file=document.getElementById('roomPic').files[0];
+  let p=parseInt(String(pRaw).replace(/[^0-9]/g,''));
+  let tot=parseInt(String(totRaw).replace(/[^0-9]/g,''));
+  if(!hid||!t||!p||!tot) return alert('Fill all: Select hotel, type price like 43900, total rooms');
+  let pic=''; if(file) pic=await fileToBase64(file);
+  let hs=getHotels(); let h=hs.find(x=>x.id===hid);
+  h.rooms.push({id:'r'+Date.now(),type:t,price:p,total:tot,image:pic});
+  saveHotels(hs);
+  document.getElementById('roomType').value='';document.getElementById('roomPrice').value='';document.getElementById('roomTotal').value='';document.getElementById('roomPic').value='';
+  load();
 }
-
 function load(){
-  let hs=getHotels(); hotelSelect.innerHTML=''; hs.forEach(h=>{let o=document.createElement('option');o.value=h.id;o.textContent=h.name;hotelSelect.appendChild(o)});
-  hotelsList.innerHTML=''; hs.forEach(h=>{
-    let d=document.createElement('div'); d.style.border='1px solid #eee';d.style.padding='10px';d.style.marginBottom='8px';d.style.borderRadius='8px';
-    d.innerHTML=`<div style="display:flex;gap:10px"><img src="${h.image||'https://via.placeholder.com/200'}" class="thumb" style="width:100px;height:70px"><div><b>${h.name}</b><br><small>${h.location}</small><br><button style="width:auto;padding:4px 8px" class="red" onclick="deleteHotel('${h.id}')">Delete Hotel</button></div></div><ul>${h.rooms.map(r=>`<li style="margin:6px 0"><img src="${r.image||'https://via.placeholder.com/100'}" style="width:60px;height:40px;object-fit:cover;border-radius:6px;vertical-align:middle"> ${r.type} - ₦${r.price} - Total:${r.total} <button style="width:auto;padding:2px 6px" class="red" onclick="deleteRoom('${h.id}','${r.id}')">X</button></li>`).join('')}</ul>`;
-    hotelsList.appendChild(d);
-  });
-  let bs=getBookings(); bookingsList.innerHTML=`<table style="width:100%"><tr><th>Hotel</th><th>Dates 12PM</th><th>Total</th><th>Status</th><th>Action</th></tr>${bs.slice().reverse().map(b=>`<tr><td>${b.hotelName}<br><small>${b.roomType}</small></td><td>${b.checkinDate}→${b.checkoutDate}</td><td>₦${b.total}</td><td>${b.status}</td><td>${b.status==='pending'?`<button class="green" style="width:auto" onclick="confirmB('${b.id}')">Confirm</button>`:''} <button style="width:auto" onclick="delB('${b.id}')">Del</button></td></tr>`).join('')}</table>`;
-  let rs=getReviews(); reviewsList.innerHTML=rs.length?rs.slice().reverse().map(r=>`<div style="border-bottom:1px solid #eee;padding:8px 0"><b>${r.hotelName}</b> - ${'⭐'.repeat(r.rating)} (${r.rating})<br><small>${r.name} - ${r.date}</small><br>${r.comment} <button style="width:auto;padding:2px 6px" class="red" onclick="delReview('${r.id}')">Delete Review</button></div>`).join(''):'<small>No reviews yet</small>';
+  let hs=getHotels();
+  let sel=document.getElementById('hotelSelect'); sel.innerHTML='';
+  hs.forEach(h=>{let o=document.createElement('option');o.value=h.id;o.textContent=h.name;sel.appendChild(o)});
+  document.getElementById('hotelsList').innerHTML=hs.map(h=>`<div style="border:1px solid #eee;padding:8px;margin-bottom:6px;border-radius:8px"><b>${h.name}</b> - ${h.location} <button class="red" style="width:auto;padding:4px 8px" onclick="saveHotels(getHotels().filter(x=>x.id!=='${h.id}'));load()">Delete</button><ul>${h.rooms.map(r=>`<li>${r.type} - ₦${r.price} - ${r.total} rooms</li>`).join('')}</ul></div>`).join('')||'No hotels yet';
+  let bs=getBookings();
+  document.getElementById('bookingsList').innerHTML=bs.slice().reverse().map(b=>`<div style="padding:6px;border-bottom:1px solid #eee">${b.hotelName} (${b.roomType}) - ${b.checkinDate}→${b.checkoutDate} - ₦${b.total} - ${b.status} <button style="width:auto" onclick="let a=getBookings();a.find(x=>x.id==='${b.id}').status='confirmed';saveBookings(a);load()">Confirm</button> <button style="width:auto" class="red" onclick="saveBookings(getBookings().filter(x=>x.id!=='${b.id}'));load()">Del</button></div>`).join('')||'No bookings';
+  let rs=getReviews();
+  document.getElementById('reviewsList').innerHTML=rs.slice().reverse().map(r=>`<div style="padding:6px;border-bottom:1px solid #eee"><b>${r.hotelName}</b> - ${'⭐'.repeat(r.rating)}<br>${r.comment} <button style="width:auto" class="red" onclick="saveReviews(getReviews().filter(x=>x.id!=='${r.id}'));load()">Del</button></div>`).join('')||'No reviews';
 }
-function deleteHotel(id){if(!confirm('Delete hotel?'))return; saveHotels(getHotels().filter(x=>x.id!==id)); load()}
-function deleteRoom(hid,rid){let hs=getHotels();let h=hs.find(x=>x.id===hid);h.rooms=h.rooms.filter(x=>x.id!==rid);saveHotels(hs);load()}
-function confirmB(id){let bs=getBookings();bs.find(x=>x.id===id).status='confirmed';saveBookings(bs);load()}
-function delB(id){saveBookings(getBookings().filter(x=>x.id!==id));load()}
-function delReview(id){saveReviews(getReviews().filter(x=>x.id!==id));load()}
-load();
-</script></body></html>
+</script>
+</body></html>
