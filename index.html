@@ -3,33 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FiveClover Inn - Full Admin</title>
+<title>FiveClover Inn - Book Hotels in Nigeria</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 p-3">
-<div class="max-w-2xl mx-auto">
-<div class="bg-white rounded-2xl p-5 shadow mb-5">
-<h1 class="text-2xl font-bold mb-4">1. Add New Hotel</h1>
-<input id="hotelName" placeholder="Hotel Name" class="w-full border-2 rounded-xl p-3 mb-3">
-<input id="hotelAddress" placeholder="Full Address" class="w-full border-2 rounded-xl p-3 mb-3">
-<input id="hotelWhatsApp" placeholder="WhatsApp" class="w-full border-2 rounded-xl p-3 mb-3">
-<div class="border-2 border-dashed rounded-xl p-3 mb-3 flex gap-3">
-<label class="bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-bold cursor-pointer">Choose File<input type="file" id="hotelImage" hidden accept="image/*"></label>
-<span id="hotelFileName" class="text-sm">no file selected</span>
+<body class="bg-gray-50">
+<div class="bg-green-700 text-white p-4 sticky top-0 z-10">
+<div class="max-w-3xl mx-auto flex justify-between items-center">
+<h1 class="text-xl font-bold">FiveClover Inn 🍀</h1>
+<a href="admin.html" class="text-xs bg-white text-green-700 px-3 py-1 rounded-full">Admin</a>
 </div>
-<button id="saveHotelBtn" class="w-full bg-green-600 text-white rounded-xl p-3 font-bold">Save Hotel</button>
-<p id="hotelStatus" class="text-sm mt-2 font-bold"></p>
 </div>
-<div class="bg-white rounded-2xl p-5 shadow mb-5">
-<h2 class="text-xl font-bold">Hotels Live - <span id="hotelCount">0</span></h2>
-<div id="hotelsList" class="mt-4"></div>
+<div class="max-w-3xl mx-auto p-4">
+<div id="hotelsContainer" class="space-y-6"></div>
 </div>
-<div class="bg-white rounded-2xl p-5 shadow">
-<h2 class="text-xl font-bold mb-2">📋 Bookings (Confirm & auto return 12PM)</h2>
-<div id="bookingsList" class="space-y-3"></div>
+<div id="bookingModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-20">
+<div class="bg-white rounded-2xl p-5 w-full max-w-md">
+<h2 class="font-bold text-lg mb-3">Book <span id="modalRoomType"></span></h2>
+<input id="guestName" placeholder="Your Full Name" class="w-full border rounded-xl p-3 mb-3">
+<input id="guestPhone" placeholder="Phone Number" class="w-full border rounded-xl p-3 mb-3">
+<input id="checkIn" type="date" class="w-full border rounded-xl p-3 mb-3">
+<input id="checkOut" type="date" class="w-full border rounded-xl p-3 mb-3">
+<button id="confirmBookBtn" class="w-full bg-green-600 text-white rounded-xl p-3 font-bold">Confirm Booking</button>
+<button onclick="closeModal()" class="w-full mt-2 text-sm text-gray-500">Cancel</button>
+<p id="bookingStatus" class="text-sm mt-2 text-center"></p>
 </div>
 </div>
 <script>
@@ -45,26 +44,44 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const storage = firebase.storage();
-document.getElementById('hotelImage').addEventListener('change', e=>{document.getElementById('hotelFileName').textContent = e.target.files[0]?.name || 'no file selected';});
-async function uploadImage(file, path){const ref = storage.ref().child(path + '/' + Date.now() + '_' + file.name); await ref.put(file); return await ref.getDownloadURL();}
-document.getElementById('saveHotelBtn').onclick = async ()=>{
-  const name = document.getElementById('hotelName').value.trim();
-  const address = document.getElementById('hotelAddress').value.trim();
-  const whatsapp = document.getElementById('hotelWhatsApp').value.trim();
-  const file = document.getElementById('hotelImage').files[0];
-  const status = document.getElementById('hotelStatus');
-  if(!name ||!address){alert('Fill name and address'); return;}
-  status.textContent = 'Saving...'; try{let imageUrl=''; if(file) imageUrl = await uploadImage(file,'hotels'); await db.collection('hotels').add({name,address,whatsapp,imageUrl,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); status.textContent='Hotel saved! ✅';}catch(err){status.textContent='Error: '+err.message;}};
-db.collection('hotels').orderBy('createdAt','desc').onSnapshot(snap=>{document.getElementById('hotelCount').textContent=snap.size; const container=document.getElementById('hotelsList'); container.innerHTML=''; snap.forEach(doc=>{const hotel=doc.data(); const id=doc.id; const div=document.createElement('div'); div.className='border-2 rounded-2xl p-4 mb-4 bg-gray-50'; div.innerHTML=`<div class="font-bold text-sm">${hotel.name} - ${hotel.address}<br>WhatsApp: ${hotel.whatsapp} <button onclick="deleteHotel('${id}')" class="bg-red-500 text-white px-3 py-1 rounded-full text-xs ml-2">Delete</button></div>${hotel.imageUrl? `<img src="${hotel.imageUrl}" class="w-full h-32 object-cover rounded-xl mt-2">`:''}<div id="rooms-${id}" class="mt-3"></div><div class="bg-white p-3 rounded-xl mt-3 border-2"><p class="font-bold text-sm mb-2">Add Room Type (with Pic & Total)</p><div class="grid grid-cols-2 gap-2 mb-2"><input id="roomType-${id}" placeholder="STANDARD" class="border rounded-xl p-2 text-sm"><input id="roomPrice-${id}" type="number" placeholder="Price 43900" class="border rounded-xl p-2 text-sm"></div><div class="grid grid-cols-2 gap-2 mb-2"><input id="roomTotal-${id}" type="number" placeholder="Total Rooms 10" class="border rounded-xl p-2 text-sm bg-yellow-50"><label class="border rounded-xl p-2 text-sm bg-blue-50 cursor-pointer text-center">📷 Room Pic<input type="file" id="roomImage-${id}" hidden accept="image/*"><span id="roomFile-${id}" class="text-[10px] block">no file</span></label></div><button onclick="addRoom('${id}')" class="w-full bg-slate-800 text-white rounded-xl p-2 text-sm font-bold">Add Room</button></div>`; container.appendChild(div); setTimeout(()=>{const inp=document.getElementById(`roomImage-${id}`); if(inp) inp.addEventListener('change', e=>{document.getElementById(`roomFile-${id}`).textContent=e.target.files[0]?.name||'no file';});},100); listenRooms(id);});});
-function deleteHotel(id){if(confirm('Delete hotel?')) db.collection('hotels').doc(id).delete();}
-async function addRoom(hotelId){const type=document.getElementById(`roomType-${hotelId}`).value.trim(); const price=parseInt(document.getElementById(`roomPrice-${hotelId}`).value); const total=parseInt(document.getElementById(`roomTotal-${hotelId}`).value); const file=document.getElementById(`roomImage-${hotelId}`).files[0]; if(!type||!price||!total){alert('Fill type, price, total'); return;} try{let imageUrl=''; if(file) imageUrl=await uploadImage(file,`rooms/${hotelId}`); await db.collection('hotels').doc(hotelId).collection('rooms').add({type,price,totalRooms:total,bookedRooms:0,availableRooms:total,imageUrl,createdAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){alert(e.message);}}
-function listenRooms(hotelId){db.collection('hotels').doc(hotelId).collection('rooms').onSnapshot(snap=>{const cont=document.getElementById(`rooms-${hotelId}`); if(!cont) return; cont.innerHTML=''; snap.forEach(rDoc=>{const r=rDoc.data(); const available=(r.totalRooms||0)-(r.bookedRooms||0); const isFull=available<=0; const el=document.createElement('div'); el.className=`flex items-center justify-between border-2 rounded-xl p-2 mt-2 ${isFull?'bg-red-50 border-red-300':'bg-white'}`; el.innerHTML=`<div class="flex items-center gap-2">${r.imageUrl?`<img src="${r.imageUrl}" class="w-14 h-14 rounded-lg object-cover">`:''}<div class="text-xs"><div class="font-bold">${r.type} - ₦${r.price} ${isFull?'<span class="text-red-600">[FULL]</span>':''}</div><div>Total: ${r.totalRooms} | Booked: ${r.bookedRooms||0} | <b>Available: ${available}</b></div></div></div><button onclick="deleteRoom('${hotelId}','${rDoc.id}')" class="text-red-500 text-xs">✕</button>`; cont.appendChild(el);});});}
-function deleteRoom(hId,rId){if(confirm('Delete room?')) db.collection('hotels').doc(hId).collection('rooms').doc(rId).delete();}
-db.collection('bookings').orderBy('createdAt','desc').limit(50).onSnapshot(snap=>{const list=document.getElementById('bookingsList'); list.innerHTML=snap.empty?'<p class="text-sm text-gray-400">No bookings yet</p>':''; snap.forEach(doc=>{const b=doc.data(); const checkoutTime=b.checkoutAt?.toDate?b.checkoutAt.toDate():null; const now=new Date(); if(b.status==='confirmed'&&checkoutTime&&now>checkoutTime){autoReturnRoom(b); db.collection('bookings').doc(doc.id).update({status:'completed'});} const div=document.createElement('div'); div.className='border rounded-xl p-3 text-sm bg-gray-50'; div.innerHTML=`<div><b>${b.hotelName||'Hotel'} - ${b.roomType||'Room'}</b> | Guest: ${b.guestName||b.name||'N/A'} | ${b.status||'pending'}</div><div class="text-xs text-gray-500">Return: 12PM next day</div><div class="mt-2 flex gap-2">${b.status!=='confirmed'&&b.status!=='completed'?`<button onclick="confirmBooking('${doc.id}')" class="bg-green-600 text-white px-3 py-1 rounded-full text-xs">Confirm (Reduce Room)</button>`:'<span class="text-green-600 text-xs">✅ Confirmed</span>'}<button onclick="cancelBooking('${doc.id}')" class="bg-gray-200 px-3 py-1 rounded-full text-xs">Cancel/Return</button></div>`; list.appendChild(div);});});
-async function confirmBooking(bookingId){const bDoc=await db.collection('bookings').doc(bookingId).get(); const b=bDoc.data(); const hotelsSnap=await db.collection('hotels').where('name','==',b.hotelName).get(); if(hotelsSnap.empty){alert('Hotel not found'); return;} const hotelId=hotelsSnap.docs[0].id; const roomsSnap=await db.collection('hotels').doc(hotelId).collection('rooms').where('type','==',b.roomType).get(); if(roomsSnap.empty){alert('Room type not found'); return;} const roomRef=roomsSnap.docs[0].ref; if((roomsSnap.docs[0].data().availableRooms||0)<=0){alert('No available rooms!'); return;} const checkoutAt=new Date(); checkoutAt.setDate(checkoutAt.getDate()+1); checkoutAt.setHours(12,0,0,0); await roomRef.update({bookedRooms:firebase.firestore.FieldValue.increment(1),availableRooms:firebase.firestore.FieldValue.increment(-1)}); await db.collection('bookings').doc(bookingId).update({status:'confirmed',checkoutAt:firebase.firestore.Timestamp.fromDate(checkoutAt),confirmedAt:firebase.firestore.FieldValue.serverTimestamp()}); alert('✅ Confirmed! Room reduced. Will auto return by 12PM tomorrow.');}
-async function cancelBooking(bookingId){const bDoc=await db.collection('bookings').doc(bookingId).get(); const b=bDoc.data(); if(b.status==='confirmed'){await autoReturnRoom(b);} await db.collection('bookings').doc(bookingId).update({status:'cancelled'});}
-async function autoReturnRoom(booking){try{const hotelsSnap=await db.collection('hotels').where('name','==',booking.hotelName).get(); if(hotelsSnap.empty) return; const hotelId=hotelsSnap.docs[0].id; const roomsSnap=await db.collection('hotels').doc(hotelId).collection('rooms').where('type','==',booking.roomType).get(); if(roomsSnap.empty) return; await roomsSnap.docs[0].ref.update({bookedRooms:firebase.firestore.FieldValue.increment(-1),availableRooms:firebase.firestore.FieldValue.increment(1)});}catch(e){console.log(e);}}
+let currentHotel = null; let currentRoom = null;
+db.collection('hotels').orderBy('createdAt','desc').onSnapshot(snap=>{
+  const container = document.getElementById('hotelsContainer');
+  container.innerHTML = snap.empty ? '<p class="text-center text-gray-400 mt-10">No hotels yet. Add in admin.</p>' : '';
+  snap.forEach(doc=>{
+    const hotel = doc.data(); const hotelId = doc.id;
+    const div = document.createElement('div'); div.className = 'bg-white rounded-2xl shadow overflow-hidden';
+    div.innerHTML = `<img src="${hotel.imageUrl || 'https://via.placeholder.com/600x300?text=FiveClover+Inn'}" class="w-full h-56 object-cover"><div class="p-4"><h2 class="text-xl font-bold">${hotel.name}</h2><p class="text-sm text-gray-500">${hotel.address}</p><p class="text-sm text-green-600 mt-1">${hotel.whatsapp || ''}</p><div id="rooms-${hotelId}" class="mt-4 space-y-3"></div><div class="mt-6 border-t pt-4"><h3 class="font-bold">Customer Reviews <span id="reviewCount-${hotelId}" class="text-green-600 text-sm">(0)</span></h3><div id="reviews-${hotelId}" class="mt-3 space-y-2 max-h-60 overflow-y-auto"></div><div class="bg-gray-50 rounded-xl p-3 mt-3"><p class="text-sm font-bold mb-2">Write your review (for customers wey lodge here)</p><input id="reviewName-${hotelId}" placeholder="Your Name" class="w-full border rounded-xl p-2 text-sm mb-2"><select id="reviewStars-${hotelId}" class="w-full border rounded-xl p-2 text-sm mb-2"><option value="5">⭐⭐⭐⭐⭐ 5 Stars</option><option value="4">⭐⭐⭐⭐ 4 Stars</option><option value="3">⭐⭐⭐ 3 Stars</option><option value="2">⭐⭐ 2 Stars</option><option value="1">⭐ 1 Star</option></select><textarea id="reviewText-${hotelId}" placeholder="How was your stay?" class="w-full border rounded-xl p-2 text-sm mb-2" rows="3"></textarea><button onclick="submitReview('${hotelId}')" class="w-full bg-slate-800 text-white rounded-xl p-2 text-sm font-bold">Submit Review</button><p id="reviewStatus-${hotelId}" class="text-xs mt-1"></p></div></div></div>`;
+    container.appendChild(div); loadRooms(hotelId); loadReviews(hotelId);
+  });
+});
+function loadRooms(hotelId){
+  db.collection('hotels').doc(hotelId).collection('rooms').onSnapshot(snap=>{
+    const cont = document.getElementById(`rooms-${hotelId}`); if(!cont) return;
+    cont.innerHTML = snap.empty ? '<p class="text-xs text-gray-400">No rooms yet</p>' : '<p class="font-bold text-sm mb-2">Available Rooms:</p>';
+    snap.forEach(rDoc=>{
+      const r=rDoc.data(); const available=(r.totalRooms||0)-(r.bookedRooms||0); const isFull=available<=0;
+      const el=document.createElement('div'); el.className=`border rounded-xl p-3 flex justify-between items-center ${isFull?'bg-red-50 opacity-60':'bg-green-50'}`;
+      el.innerHTML=`<div class="flex gap-3 items-center">${r.imageUrl?`<img src="${r.imageUrl}" class="w-16 h-16 rounded-xl object-cover">`:''}<div><div class="font-bold text-sm">${r.type} - ₦${r.price?.toLocaleString()}</div><div class="text-xs">Total: ${r.totalRooms} | <span class="${isFull?'text-red-600':'text-green-600'} font-bold">${isFull?'FULLY BOOKED':available+' Available'}</span></div></div></div><button ${isFull?'disabled':`onclick="openBooking('${hotelId}','${rDoc.id}','${r.type}','${rDoc.id}')"`} class="bg-green-600 text-white px-4 py-2 rounded-full text-xs font-bold ${isFull?'bg-gray-400':''}">${isFull?'Full':'Book Now'}</button>`;
+      cont.appendChild(el);
+    });
+  });
+}
+function loadReviews(hotelId){
+  db.collection('hotels').doc(hotelId).collection('reviews').orderBy('createdAt','desc').onSnapshot(snap=>{
+    document.getElementById(`reviewCount-${hotelId}`).textContent=`(${snap.size})`;
+    const cont=document.getElementById(`reviews-${hotelId}`); if(!cont) return; cont.innerHTML=snap.empty?'<p class="text-xs text-gray-400">No reviews yet. Be first!</p>':'';
+    snap.forEach(doc=>{const rev=doc.data(); const stars='⭐'.repeat(rev.stars||5); const el=document.createElement('div'); el.className='bg-white border rounded-xl p-2 text-sm'; el.innerHTML=`<div class="flex justify-between"><b>${rev.name}</b><span class="text-xs">${stars}</span></div><div class="text-xs text-gray-600 mt-1">${rev.text}</div>`; cont.appendChild(el);});
+  });
+}
+async function submitReview(hotelId){
+  const name=document.getElementById(`reviewName-${hotelId}`).value.trim(); const stars=parseInt(document.getElementById(`reviewStars-${hotelId}`).value); const text=document.getElementById(`reviewText-${hotelId}`).value.trim(); const status=document.getElementById(`reviewStatus-${hotelId}`);
+  if(!name||!text){alert('Fill name and review'); return;} status.textContent='Posting...';
+  try{await db.collection('hotels').doc(hotelId).collection('reviews').add({name,stars,text,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); status.textContent='Review posted! ✅'; document.getElementById(`reviewName-${hotelId}`).value=''; document.getElementById(`reviewText-${hotelId}`).value='';}catch(e){status.textContent='Error: '+e.message;}
+}
+function openBooking(hotelId,roomId,roomType,roomDocId){db.collection('hotels').doc(hotelId).get().then(doc=>{currentHotel={id:hotelId,name:doc.data().name}; currentRoom={id:roomDocId,type:roomType,hotelId}; document.getElementById('modalRoomType').textContent=doc.data().name+' - '+roomType; document.getElementById('bookingModal').classList.remove('hidden'); document.getElementById('bookingModal').classList.add('flex');});}
+function closeModal(){document.getElementById('bookingModal').classList.add('hidden'); document.getElementById('bookingModal').classList.remove('flex');}
+document.getElementById('confirmBookBtn').onclick=async()=>{const guestName=document.getElementById('guestName').value.trim(); const guestPhone=document.getElementById('guestPhone').value.trim(); const checkIn=document.getElementById('checkIn').value; const checkOut=document.getElementById('checkOut').value; const status=document.getElementById('bookingStatus'); if(!guestName||!guestPhone||!checkIn){alert('Fill name, phone, check-in'); return;} status.textContent='Booking...'; try{await db.collection('bookings').add({hotelId:currentHotel.id,hotelName:currentHotel.name,roomId:currentRoom.id,roomType:currentRoom.type,guestName,guestPhone,name:guestName,checkIn,checkOut,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()}); status.textContent='Booked! Admin will confirm ✅'; setTimeout(()=>{closeModal(); status.textContent='';},2000);}catch(e){status.textContent='Error: '+e.message;}};
 </script>
 </body>
 </html>
