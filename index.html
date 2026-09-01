@@ -24,16 +24,12 @@
 <p id="modalPriceInfo" class="text-sm text-green-700 font-bold mb-3"></p>
 <input id="guestName" placeholder="Your Full Name" class="w-full border rounded-xl p-3 mb-3">
 <input id="guestPhone" placeholder="Phone Number" class="w-full border rounded-xl p-3 mb-3">
-
 <label class="text-xs font-bold">How many days?</label>
 <input id="numDays" type="number" min="1" value="1" oninput="calculateCheckout()" class="w-full border rounded-xl p-3 mb-3">
-
 <label class="text-xs font-bold">Check-in Date</label>
 <input id="checkIn" type="date" onchange="calculateCheckout()" class="w-full border rounded-xl p-3 mb-3">
-
 <label class="text-xs font-bold">Check-out & Total (Auto)</label>
 <input id="checkOut" type="text" readonly class="w-full border rounded-xl p-3 mb-3 bg-yellow-50 font-bold text-green-700" placeholder="Auto show here">
-
 <button id="confirmBookBtn" class="w-full bg-green-600 text-white rounded-xl p-3 font-bold">Confirm & Chat Hotel on WhatsApp</button>
 <button onclick="closeModal()" class="w-full mt-2 text-sm text-gray-500">Cancel</button>
 <p id="bookingStatus" class="text-sm mt-2 text-center"></p>
@@ -72,8 +68,7 @@ function loadRooms(hotelId){
     snap.forEach(rDoc=>{
       const r=rDoc.data(); const available=(r.totalRooms||0)-(r.bookedRooms||0); const isFull=available<=0;
       const el=document.createElement('div'); el.className=`border rounded-xl p-3 flex justify-between items-center ${isFull?'bg-red-50':'bg-green-50'}`;
-      // FIX: NOW PASSING PRICE TO openBooking
-      el.innerHTML=`<div class="flex gap-3 items-center"><img src="${r.imageUrl}" class="w-16 h-16 rounded-xl object-cover"><div><div class="font-bold text-sm">${r.type} - ₦${r.price?.toLocaleString()}</div><div class="text-xs">${available} Available</div></div></div><button ${isFull?'disabled':`onclick="openBooking('${hotelId}','${rDoc.id}','${r.type}', ${r.price})"`} class="bg-green-600 text-white px-4 py-2 rounded-full text-xs font-bold">Book</button>`;
+      el.innerHTML=`<div class="flex gap-3 items-center"><img src="${r.imageUrl}" class="w-16 h-16 rounded-xl object-cover"><div><div class="font-bold text-sm">${r.type} - ₦${r.price?.toLocaleString()}</div><div class="text-xs font-bold ${isFull?'text-red-600':'text-green-600'}">${isFull?'FULLY BOOKED':available+' Available'}</div></div></div><button ${isFull?'disabled':`onclick="openBooking('${hotelId}','${rDoc.id}','${r.type}', ${r.price})"`} class="bg-green-600 text-white px-4 py-2 rounded-full text-xs font-bold ${isFull?'bg-gray-400':''}">${isFull?'Full':'Book'}</button>`;
       cont.appendChild(el);
     });
   });
@@ -104,7 +99,6 @@ function calculateCheckout(){
   checkoutDate.setDate(checkinDate.getDate() + days);
   autoCheckoutDate = checkoutDate.toISOString().split('T')[0];
   let formatted = checkoutDate.toLocaleDateString('en-GB');
-  
   let price = currentRoom?.price || 0;
   bookingTotal = days * price;
   document.getElementById('checkOut').value = `${formatted} (${days} nights) = ₦${bookingTotal.toLocaleString()}`;
@@ -118,7 +112,7 @@ document.getElementById('confirmBookBtn').onclick=async()=>{
   const checkOut=autoCheckoutDate;
   const status=document.getElementById('bookingStatus');
   if(!guestName||!guestPhone||!checkIn){alert('Fill all'); return;}
-  status.textContent='Saving...';
+  status.textContent='Saving & updating room...';
   try{
     await db.collection('bookings').add({
       hotelId:currentHotel.id, hotelName:currentHotel.name,
@@ -130,15 +124,19 @@ document.getElementById('confirmBookBtn').onclick=async()=>{
       status:'pending',
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
-    status.textContent='Saved! Opening WhatsApp...';
 
+    // === NEW FIX: AUTO REDUCE ROOM COUNT ===
+    const roomRef = db.collection('hotels').doc(currentHotel.id).collection('rooms').doc(currentRoom.id);
+    await roomRef.update({
+      bookedRooms: firebase.firestore.FieldValue.increment(1)
+    });
+
+    status.textContent='Saved! Opening WhatsApp... ✅';
     let rawNumber = currentHotel.whatsapp;
     let cleanNumber = rawNumber.replace(/[^0-9]/g, "");
     if(cleanNumber.startsWith("0")) cleanNumber = "234" + cleanNumber.substring(1);
-
     let message = `*NEW BOOKING - ${currentHotel.name}*%0A%0ARoom: ${currentRoom.type} - ₦${currentRoom.price.toLocaleString()}/night%0AName: ${guestName}%0APhone: ${guestPhone}%0ADays: ${numDays} night(s)%0ACheck-in: ${checkIn}%0ACheck-out: ${checkOut}%0ATotal: ₦${bookingTotal.toLocaleString()}%0A%0AAbeg confirm`;
     let waLink = `https://wa.me/${cleanNumber}?text=${message}`;
-
     setTimeout(()=>{closeModal(); status.textContent=''; window.location.href = waLink;},800);
   }catch(e){status.textContent='Error: '+e.message;}
 };
