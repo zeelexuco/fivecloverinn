@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FiveClover Admin - Free Pic Mode</title>
+<title>FiveClover Admin - Fixed</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-gray-100">
 
-<!-- PASSWORD -->
 <div id="lockScreen" class="fixed inset-0 bg-slate-900 flex items-center justify-center p-4 z-50">
 <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center">
 <h1 class="text-2xl font-bold">🔒 Admin Locked</h1>
@@ -22,7 +21,7 @@
 <div id="adminContent" class="hidden p-3">
 <div class="max-w-2xl mx-auto">
 <div class="bg-green-100 border-2 border-green-400 rounded-xl p-3 mb-4 text-sm">
-<b>✅ FREE PIC MODE:</b> No Storage needed! Pic go save inside Firestore directly. No upgrade needed!
+<b>✅ FIXED MODE:</b> Bookings now show with Days + Auto Checkout + Total Price!
 </div>
 
 <div class="bg-white rounded-2xl p-5 shadow mb-5">
@@ -30,7 +29,7 @@
 <input id="hotelName" placeholder="Hotel Name e.g. Caritas INN" class="w-full border-2 rounded-xl p-3 mb-3 mt-3">
 <input id="hotelAddress" placeholder="Full Address" class="w-full border-2 rounded-xl p-3 mb-3">
 <input id="hotelWhatsApp" placeholder="WhatsApp e.g. 081..." class="w-full border-2 rounded-xl p-3 mb-3">
-<label class="w-full border-2 border-dashed rounded-xl p-3 mb-3 flex gap-3 cursor-pointer bg-blue-50">📷 Hotel Pic (free mode) <input type="file" id="hotelImage" hidden accept="image/*"><span id="hotelFileName" class="text-sm">choose file</span></label>
+<label class="w-full border-2 border-dashed rounded-xl p-3 mb-3 flex gap-3 cursor-pointer bg-blue-50">📷 Hotel Pic <input type="file" id="hotelImage" hidden accept="image/*"><span id="hotelFileName" class="text-sm">choose file</span></label>
 <img id="hotelPreview" class="w-full h-32 object-cover rounded-xl hidden mb-3">
 <button id="saveHotelBtn" class="w-full bg-green-600 text-white rounded-xl p-3 font-bold">Save Hotel</button>
 </div>
@@ -40,7 +39,7 @@
 <div id="hotelsList" class="mt-4"></div>
 </div>
 
-<div class="bg-white rounded-2xl p-5 shadow"><h2 class="text-xl font-bold">Bookings</h2><div id="bookingsList"></div></div>
+<div class="bg-white rounded-2xl p-5 shadow"><h2 class="text-xl font-bold">📋 Bookings (New System)</h2><div id="bookingsList" class="mt-4 space-y-3"></div></div>
 </div>
 </div>
 
@@ -59,13 +58,11 @@ const firebaseConfig={apiKey:"AIzaSyDzVRHwXgZXZmlX7KIehTLb1n-ZjGJwWfI",authDomai
 firebase.initializeApp(firebaseConfig); const db=firebase.firestore();
 
 let hotelBase64=''; let roomBase64Map={};
-
 function fileToBase64(file, callback){
   const reader=new FileReader();
   reader.onload=e=>callback(e.target.result);
   reader.readAsDataURL(file);
 }
-
 document.getElementById('hotelImage').addEventListener('change',e=>{
   const file=e.target.files[0]; if(!file) return;
   document.getElementById('hotelFileName').textContent=file.name;
@@ -75,7 +72,6 @@ document.getElementById('hotelImage').addEventListener('change',e=>{
     prev.src=base64; prev.classList.remove('hidden');
   });
 });
-
 document.getElementById('saveHotelBtn').onclick=async()=>{
   const name=document.getElementById('hotelName').value.trim();
   const address=document.getElementById('hotelAddress').value.trim();
@@ -84,7 +80,7 @@ document.getElementById('saveHotelBtn').onclick=async()=>{
   if(!hotelBase64){alert('Pick Hotel Pic!');return;}
   try{
     await db.collection('hotels').add({name,address,whatsapp,imageUrl:hotelBase64,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    alert('Hotel saved WITH pic! ✅ No Storage needed');
+    alert('Hotel saved ✅');
     document.getElementById('hotelName').value=''; document.getElementById('hotelAddress').value=''; document.getElementById('hotelWhatsApp').value='';
     hotelBase64=''; document.getElementById('hotelFileName').textContent='choose file'; document.getElementById('hotelPreview').classList.add('hidden');
   }catch(e){alert('Error: '+e.message);}
@@ -96,7 +92,7 @@ db.collection('hotels').orderBy('createdAt','desc').onSnapshot(snap=>{
   snap.forEach(doc=>{
     const hotel=doc.data(); const id=doc.id;
     const div=document.createElement('div'); div.className='border-2 rounded-2xl p-4 mb-4 bg-gray-50';
-    div.innerHTML=`<div class="font-bold text-sm">${hotel.name} - ${hotel.address}<br>WhatsApp:${hotel.whatsapp} <button onclick="db.collection('hotels').doc('${id}').delete()" class="bg-red-500 text-white px-2 py-1 rounded-full text-xs ml-2">Delete</button></div><img src="${hotel.imageUrl}" class="w-full h-32 object-cover rounded-xl mt-2"><div id="rooms-${id}" class="mt-3"></div><div class="bg-white p-3 rounded-xl mt-3 border-2"><p class="font-bold text-sm mb-2">Add Room WITH Pic (Free Mode)</p><div class="grid grid-cols-2 gap-2 mb-2"><input id="roomType-${id}" placeholder="STANDARD" class="border rounded-xl p-2 text-sm"><input id="roomPrice-${id}" type="number" placeholder="Price 43900" class="border rounded-xl p-2 text-sm"></div><div class="grid grid-cols-2 gap-2 mb-2"><input id="roomTotal-${id}" type="number" placeholder="Total e.g. 3" class="border rounded-xl p-2 text-sm bg-yellow-50 font-bold"><label class="border-2 border-blue-500 rounded-xl p-2 text-sm bg-blue-50 text-center font-bold cursor-pointer">📷 Room Pic<input type="file" id="roomImage-${id}" hidden accept="image/*"><span id="roomFile-${id}" class="text-[10px] block">must pick</span></label></div><img id="roomPreview-${id}" class="w-full h-24 object-cover rounded-xl hidden mb-2"><button id="btn-${id}" onclick="addRoom('${id}')" class="w-full bg-green-600 text-white rounded-xl p-3 text-sm font-bold">Add Room WITH Pic ✅</button></div>`;
+    div.innerHTML=`<div class="font-bold text-sm">${hotel.name} - ${hotel.address}<br>WhatsApp:${hotel.whatsapp} <button onclick="db.collection('hotels').doc('${id}').delete()" class="bg-red-500 text-white px-2 py-1 rounded-full text-xs ml-2">Delete</button></div><img src="${hotel.imageUrl}" class="w-full h-32 object-cover rounded-xl mt-2"><div id="rooms-${id}" class="mt-3"></div><div class="bg-white p-3 rounded-xl mt-3 border-2"><p class="font-bold text-sm mb-2">Add Room WITH Pic</p><div class="grid grid-cols-2 gap-2 mb-2"><input id="roomType-${id}" placeholder="STANDARD" class="border rounded-xl p-2 text-sm"><input id="roomPrice-${id}" type="number" placeholder="Price 43900" class="border rounded-xl p-2 text-sm"></div><div class="grid grid-cols-2 gap-2 mb-2"><input id="roomTotal-${id}" type="number" placeholder="Total e.g. 3" class="border rounded-xl p-2 text-sm bg-yellow-50 font-bold"><label class="border-2 border-blue-500 rounded-xl p-2 text-sm bg-blue-50 text-center font-bold cursor-pointer">📷 Room Pic<input type="file" id="roomImage-${id}" hidden accept="image/*"><span id="roomFile-${id}" class="text-[10px] block">must pick</span></label></div><img id="roomPreview-${id}" class="w-full h-24 object-cover rounded-xl hidden mb-2"><button id="btn-${id}" onclick="addRoom('${id}')" class="w-full bg-green-600 text-white rounded-xl p-3 text-sm font-bold">Add Room ✅</button></div>`;
     container.appendChild(div);
     setTimeout(()=>{
       const inp=document.getElementById(`roomImage-${id}`);
@@ -113,21 +109,20 @@ db.collection('hotels').orderBy('createdAt','desc').onSnapshot(snap=>{
     listenRooms(id);
   });
 });
-
 async function addRoom(hotelId){
   const type=document.getElementById(`roomType-${hotelId}`).value.trim();
   const price=parseInt(document.getElementById(`roomPrice-${hotelId}`).value);
   const total=parseInt(document.getElementById(`roomTotal-${hotelId}`).value);
   const imageUrl=roomBase64Map[hotelId];
   if(!type||!price||!total){alert('Fill Type, Price, Total');return;}
-  if(!imageUrl){alert('Pick Room Pic! Must pick pic in this free mode');return;}
+  if(!imageUrl){alert('Pick Room Pic!');return;}
   const btn=document.getElementById(`btn-${hotelId}`); btn.textContent='Saving...';
   try{
     await db.collection('hotels').doc(hotelId).collection('rooms').add({type,price,totalRooms:total,bookedRooms:0,availableRooms:total,imageUrl,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    alert('Room added WITH pic! ✅ Works without Storage upgrade!');
+    alert('Room added ✅');
     document.getElementById(`roomType-${hotelId}`).value=''; document.getElementById(`roomPrice-${hotelId}`).value=''; document.getElementById(`roomTotal-${hotelId}`).value='';
     roomBase64Map[hotelId]=''; document.getElementById(`roomFile-${hotelId}`).textContent='must pick'; document.getElementById(`roomPreview-${hotelId}`).classList.add('hidden');
-  }catch(e){alert('Error: '+e.message);}finally{btn.textContent='Add Room WITH Pic ✅';}
+  }catch(e){alert('Error: '+e.message);}finally{btn.textContent='Add Room ✅';}
 }
 function listenRooms(hotelId){
   db.collection('hotels').doc(hotelId).collection('rooms').onSnapshot(snap=>{
@@ -140,6 +135,45 @@ function listenRooms(hotelId){
     });
   });
 }
+
+// === NEW FIX: THIS WAS MISSING BEFORE! NOW BOOKINGS WILL SHOW ===
+db.collection('bookings').orderBy('createdAt','desc').onSnapshot(snap=>{
+  const container = document.getElementById('bookingsList');
+  if(snap.empty){
+    container.innerHTML = '<p class="text-sm text-gray-400">No bookings yet</p>';
+    return;
+  }
+  container.innerHTML = '';
+  snap.forEach(doc=>{
+    const b = doc.data();
+    const days = b.numDays || 1;
+    const total = b.totalPrice? `₦${Number(b.totalPrice).toLocaleString()}` : 'Calculating...';
+    const checkIn = b.checkIn || 'N/A';
+    const checkOut = b.checkOut || 'N/A';
+
+    const div = document.createElement('div');
+    div.className = 'border-2 rounded-xl p-3 bg-yellow-50';
+    div.innerHTML = `
+      <div class="flex justify-between">
+        <b class="text-sm">${b.hotelName} - ${b.roomType}</b>
+        <span class="text-xs bg-green-600 text-white px-2 py-1 rounded-full">${b.status}</span>
+      </div>
+      <div class="text-xs mt-2 space-y-1">
+        <div>👤 <b>${b.guestName || b.name}</b> - ${b.guestPhone}</div>
+        <div>📅 <b>${days} day(s)</b> | Check-in: <b>${checkIn}</b></div>
+        <div>📅 Check-out (Auto): <b>${checkOut}</b></div>
+        <div>💰 Total: <b class="text-green-700 text-sm">${total}</b> (${days} x price)</div>
+        <div class="text-[10px] text-gray-500">${b.createdAt?.toDate().toLocaleString() || ''}</div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <a href="https://wa.me/${(b.guestPhone||'').replace(/[^0-9]/g,'').replace(/^0/,'234')}" target="_blank" class="flex-1 bg-green-600 text-white text-xs text-center py-2 rounded-xl font-bold">Chat Customer</a>
+        <button onclick="db.collection('bookings').doc('${doc.id}').update({status:'confirmed'})" class="flex-1 bg-blue-600 text-white text-xs py-2 rounded-xl font-bold">Confirm</button>
+        <button onclick="db.collection('bookings').doc('${doc.id}').delete()" class="bg-red-500 text-white text-xs px-3 py-2 rounded-xl">✕</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+});
 </script>
 </body>
 </html>
