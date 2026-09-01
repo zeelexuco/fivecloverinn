@@ -7,7 +7,6 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50">
 <div class="bg-green-700 text-white p-4 sticky top-0 z-10">
@@ -19,23 +18,23 @@
 <div id="hotelsContainer" class="space-y-6"></div>
 </div>
 
-<!-- NEW FIXED BOOKING MODAL -->
 <div id="bookingModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-20">
 <div class="bg-white rounded-2xl p-5 w-full max-w-md">
-<h2 class="font-bold text-lg mb-3">Book <span id="modalRoomType"></span></h2>
+<h2 class="font-bold text-lg mb-1">Book <span id="modalRoomType"></span></h2>
+<p id="modalPriceInfo" class="text-sm text-green-700 font-bold mb-3"></p>
 <input id="guestName" placeholder="Your Full Name" class="w-full border rounded-xl p-3 mb-3">
-<input id="guestPhone" placeholder="Phone Number e.g. 08126955544" class="w-full border rounded-xl p-3 mb-3">
+<input id="guestPhone" placeholder="Phone Number" class="w-full border rounded-xl p-3 mb-3">
 
-<label class="text-xs font-bold text-gray-600">How many days?</label>
-<input id="numDays" type="number" min="1" value="1" oninput="calculateCheckout()" placeholder="e.g. 3" class="w-full border rounded-xl p-3 mb-3">
+<label class="text-xs font-bold">How many days?</label>
+<input id="numDays" type="number" min="1" value="1" oninput="calculateCheckout()" class="w-full border rounded-xl p-3 mb-3">
 
-<label class="text-xs font-bold text-gray-600">Check-in Date</label>
+<label class="text-xs font-bold">Check-in Date</label>
 <input id="checkIn" type="date" onchange="calculateCheckout()" class="w-full border rounded-xl p-3 mb-3">
 
-<label class="text-xs font-bold text-gray-600">Check-out Date (Auto)</label>
-<input id="checkOut" type="text" readonly class="w-full border rounded-xl p-3 mb-3 bg-gray-100" placeholder="Auto show here">
+<label class="text-xs font-bold">Check-out & Total (Auto)</label>
+<input id="checkOut" type="text" readonly class="w-full border rounded-xl p-3 mb-3 bg-yellow-50 font-bold text-green-700" placeholder="Auto show here">
 
-<button id="confirmBookBtn" class="w-full bg-green-600 text-white rounded-xl p-3 font-bold">Confirm Booking & Chat on WhatsApp</button>
+<button id="confirmBookBtn" class="w-full bg-green-600 text-white rounded-xl p-3 font-bold">Confirm & Chat Hotel on WhatsApp</button>
 <button onclick="closeModal()" class="w-full mt-2 text-sm text-gray-500">Cancel</button>
 <p id="bookingStatus" class="text-sm mt-2 text-center"></p>
 </div>
@@ -45,25 +44,23 @@
 const firebaseConfig = {
   apiKey: "AIzaSyDzVRHwXgZXZmlX7KIehTLb1n-ZjGJwWfI",
   authDomain: "fiveclover-237bb.firebaseapp.com",
-  databaseURL: "https://fiveclover-237bb-default-rtdb.firebaseio.com",
   projectId: "fiveclover-237bb",
-  storageBucket: "fiveclover-237bb.firebasestorage.app",
   messagingSenderId: "337287455721",
-  appId: "1:337287455721:web:ebbb8fd23959b1b0922178",
-  measurementId: "G-G2EG4G3YLZ"
+  appId: "1:337287455721:web:ebbb8fd23959b1b0922178"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 let currentHotel = null; let currentRoom = null;
 let autoCheckoutDate = "";
+let bookingTotal = 0;
 
 db.collection('hotels').orderBy('createdAt','desc').onSnapshot(snap=>{
   const container = document.getElementById('hotelsContainer');
-  container.innerHTML = snap.empty? '<p class="text-center text-gray-400 mt-10">No hotels yet. Add in admin.</p>' : '';
+  container.innerHTML = snap.empty? '<p class="text-center text-gray-400 mt-10">No hotels yet.</p>' : '';
   snap.forEach(doc=>{
     const hotel = doc.data(); const hotelId = doc.id;
     const div = document.createElement('div'); div.className = 'bg-white rounded-2xl shadow overflow-hidden';
-    div.innerHTML = `<img src="${hotel.imageUrl || 'https://via.placeholder.com/600x300?text=FiveClover+Inn'}" class="w-full h-56 object-cover"><div class="p-4"><h2 class="text-xl font-bold">${hotel.name}</h2><p class="text-sm text-gray-500">${hotel.address}</p><p class="text-sm text-green-600 mt-1">${hotel.whatsapp || ''}</p><div id="rooms-${hotelId}" class="mt-4 space-y-3"></div></div>`;
+    div.innerHTML = `<img src="${hotel.imageUrl}" class="w-full h-56 object-cover"><div class="p-4"><h2 class="text-xl font-bold">${hotel.name}</h2><p class="text-sm text-gray-500">${hotel.address}</p><div id="rooms-${hotelId}" class="mt-4 space-y-3"></div></div>`;
     container.appendChild(div); loadRooms(hotelId);
   });
 });
@@ -74,19 +71,21 @@ function loadRooms(hotelId){
     cont.innerHTML = snap.empty? '<p class="text-xs text-gray-400">No rooms yet</p>' : '<p class="font-bold text-sm mb-2">Available Rooms:</p>';
     snap.forEach(rDoc=>{
       const r=rDoc.data(); const available=(r.totalRooms||0)-(r.bookedRooms||0); const isFull=available<=0;
-      const el=document.createElement('div'); el.className=`border rounded-xl p-3 flex justify-between items-center ${isFull?'bg-red-50 opacity-60':'bg-green-50'}`;
-      el.innerHTML=`<div class="flex gap-3 items-center">${r.imageUrl?`<img src="${r.imageUrl}" class="w-16 h-16 rounded-xl object-cover">`:''}<div><div class="font-bold text-sm">${r.type} - ₦${r.price?.toLocaleString()}</div><div class="text-xs">Total: ${r.totalRooms} | <span class="${isFull?'text-red-600':'text-green-600'} font-bold">${isFull?'FULLY BOOKED':available+' Available'}</span></div></div></div><button ${isFull?'disabled':`onclick="openBooking('${hotelId}','${rDoc.id}','${r.type}')"`} class="bg-green-600 text-white px-4 py-2 rounded-full text-xs font-bold ${isFull?'bg-gray-400':''}">${isFull?'Full':'Book Now'}</button>`;
+      const el=document.createElement('div'); el.className=`border rounded-xl p-3 flex justify-between items-center ${isFull?'bg-red-50':'bg-green-50'}`;
+      // FIX: NOW PASSING PRICE TO openBooking
+      el.innerHTML=`<div class="flex gap-3 items-center"><img src="${r.imageUrl}" class="w-16 h-16 rounded-xl object-cover"><div><div class="font-bold text-sm">${r.type} - ₦${r.price?.toLocaleString()}</div><div class="text-xs">${available} Available</div></div></div><button ${isFull?'disabled':`onclick="openBooking('${hotelId}','${rDoc.id}','${r.type}', ${r.price})"`} class="bg-green-600 text-white px-4 py-2 rounded-full text-xs font-bold">Book</button>`;
       cont.appendChild(el);
     });
   });
 }
 
-function openBooking(hotelId,roomDocId,roomType){
+function openBooking(hotelId,roomDocId,roomType,roomPrice){
   db.collection('hotels').doc(hotelId).get().then(doc=>{
     const data = doc.data();
-    currentHotel={id:hotelId, name:data.name, whatsapp:data.whatsapp || '08126955544', address:data.address};
-    currentRoom={id:roomDocId,type:roomType,hotelId};
+    currentHotel={id:hotelId, name:data.name, whatsapp:data.whatsapp || '08126955544'};
+    currentRoom={id:roomDocId,type:roomType,hotelId, price: roomPrice};
     document.getElementById('modalRoomType').textContent=data.name+' - '+roomType;
+    document.getElementById('modalPriceInfo').textContent='₦' + Number(roomPrice).toLocaleString() + ' per night';
     document.getElementById('bookingModal').classList.remove('hidden');
     document.getElementById('bookingModal').classList.add('flex');
     document.getElementById('checkIn').valueAsDate = new Date();
@@ -97,6 +96,7 @@ function closeModal(){document.getElementById('bookingModal').classList.add('hid
 
 function calculateCheckout(){
   let days = parseInt(document.getElementById('numDays').value) || 1;
+  if(days < 1) days = 1;
   let checkin = document.getElementById('checkIn').value;
   if(!checkin) return;
   let checkinDate = new Date(checkin);
@@ -104,56 +104,42 @@ function calculateCheckout(){
   checkoutDate.setDate(checkinDate.getDate() + days);
   autoCheckoutDate = checkoutDate.toISOString().split('T')[0];
   let formatted = checkoutDate.toLocaleDateString('en-GB');
-  document.getElementById('checkOut').value = formatted + " (" + days + " night" + (days>1?"s":"") + ")";
+  
+  let price = currentRoom?.price || 0;
+  bookingTotal = days * price;
+  document.getElementById('checkOut').value = `${formatted} (${days} nights) = ₦${bookingTotal.toLocaleString()}`;
 }
 
 document.getElementById('confirmBookBtn').onclick=async()=>{
   const guestName=document.getElementById('guestName').value.trim();
   const guestPhone=document.getElementById('guestPhone').value.trim();
-  const numDays=document.getElementById('numDays').value;
+  const numDays=parseInt(document.getElementById('numDays').value) || 1;
   const checkIn=document.getElementById('checkIn').value;
   const checkOut=autoCheckoutDate;
   const status=document.getElementById('bookingStatus');
-  if(!guestName||!guestPhone||!checkIn||!numDays){alert('Abeg fill name, phone, days and check-in'); return;}
-  status.textContent='Booking...';
+  if(!guestName||!guestPhone||!checkIn){alert('Fill all'); return;}
+  status.textContent='Saving...';
   try{
     await db.collection('bookings').add({
-      hotelId:currentHotel.id,
-      hotelName:currentHotel.name,
-      roomId:currentRoom.id,
-      roomType:currentRoom.type,
-      guestName,guestPhone,name:guestName,
-      numDays: parseInt(numDays),
-      checkIn,checkOut,
+      hotelId:currentHotel.id, hotelName:currentHotel.name,
+      roomId:currentRoom.id, roomType:currentRoom.type,
+      roomPrice: currentRoom.price,
+      guestName, guestPhone, name:guestName,
+      numDays, checkIn, checkOut,
+      totalPrice: bookingTotal,
       status:'pending',
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
-    status.textContent='Saved! Opening WhatsApp... ✅';
+    status.textContent='Saved! Opening WhatsApp...';
 
-    // FIX WHATSAPP NUMBER - 081 -> 23481
-    let rawNumber = currentHotel.whatsapp || '08126955544';
+    let rawNumber = currentHotel.whatsapp;
     let cleanNumber = rawNumber.replace(/[^0-9]/g, "");
-    if(cleanNumber.startsWith("0")){
-      cleanNumber = "234" + cleanNumber.substring(1);
-    }
+    if(cleanNumber.startsWith("0")) cleanNumber = "234" + cleanNumber.substring(1);
 
-    let message = `*NEW BOOKING - ${currentHotel.name}*%0A%0A` +
-                  `*Room:* ${currentRoom.type}%0A` +
-                  `*Name:* ${guestName}%0A` +
-                  `*Phone:* ${guestPhone}%0A` +
-                  `*Days:* ${numDays} night(s)%0A` +
-                  `*Check-in:* ${checkIn}%0A` +
-                  `*Check-out:* ${checkOut}%0A%0A` +
-                  `Abeg confirm my booking`;
-
+    let message = `*NEW BOOKING - ${currentHotel.name}*%0A%0ARoom: ${currentRoom.type} - ₦${currentRoom.price.toLocaleString()}/night%0AName: ${guestName}%0APhone: ${guestPhone}%0ADays: ${numDays} night(s)%0ACheck-in: ${checkIn}%0ACheck-out: ${checkOut}%0ATotal: ₦${bookingTotal.toLocaleString()}%0A%0AAbeg confirm`;
     let waLink = `https://wa.me/${cleanNumber}?text=${message}`;
 
-    setTimeout(()=>{
-      closeModal();
-      status.textContent='';
-      window.location.href = waLink; // DIRECT TO WHATSAPP
-    },1000);
-
+    setTimeout(()=>{closeModal(); status.textContent=''; window.location.href = waLink;},800);
   }catch(e){status.textContent='Error: '+e.message;}
 };
 </script>
